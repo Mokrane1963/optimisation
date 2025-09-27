@@ -96,17 +96,8 @@ def plot_solution_graphique(contraintes, solution_x, solution_y, variables):
 # ------------------------
 # Interface Streamlit
 # ------------------------
-st.markdown("""
-<div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
-  <p style="color: #8B4513; 
-            font-weight: bold; 
-            font-size: 20px; 
-            margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
-   ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
-  </p>
-</div>
-""", unsafe_allow_html=True)
+
+
 st.markdown("""
 <div style="text-align: center; font-family: courier;">
   <p style="color: #8B4513; 
@@ -122,7 +113,7 @@ st.markdown("""
 <div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
   <p style="color: #8B4513; 
             font-weight: bold; 
-            font-size: 20px; 
+            font-size: 24px; 
             margin-top: 10px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
    ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
