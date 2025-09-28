@@ -42,7 +42,17 @@ def bisection(f, a, b, tol=1e-6, max_iter=100):
 # -------------------------
 
 st.title("🔎 Méthode de la bissection")
-
+st.markdown("""
+<div style="text-align: center; font-family: courier;">
+  <p style="color: #3366FF; 
+            font-weight: bold; 
+            font-size: 18px; 
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
+    Développé par: Hachemi Mokrane • Septembre 2025
+  </p>
+</div>
+""", unsafe_allow_html=True)
 st.markdown("""
 Donnez une **fonction f(x)** (ex: `sin(x)`, `x**2 - 2`, `exp(x) - 3`).  
 Puis choisissez un intervalle `[a, b]` et la méthode de bissection cherchera une racine.
