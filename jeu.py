@@ -10,7 +10,7 @@ import streamlit as st
 import random
 import time
 
-st.set_page_config(page_title="Morpion IA", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Thlatha IA", page_icon="🤖", layout="centered")
 st.markdown("""
 <div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
   <p style="color: #8B4513; 
