@@ -190,4 +190,4 @@ with col2:
         st.rerun()
 
 st.write("---")
-st.write("💡 Astuce : En *Facile*, l’ordinateur joue au hasard (tu peux gagner). En *Difficile*, il est imbattable !")
+st.write("💡 Astuce: En *Facile*, l’ordinateur joue au hasard (tu peux gagner). En *Difficile*, il est imbattable !")
