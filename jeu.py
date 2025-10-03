@@ -24,7 +24,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Helpers ---
-def init_state():
+def etat_iniale():
     if "board" not in st.session_state:
         st.session_state.board = [["" for _ in range(3)] for _ in range(3)]
     if "winner" not in st.session_state:
@@ -36,12 +36,12 @@ def init_state():
     if "difficulty" not in st.session_state:
         st.session_state.difficulty = "Moyen"
 
-def symbol(cell):
+def symbole(cell):
     if cell == "R": return "🔴"
     if cell == "B": return "🔵"
     return "◻️"
 
-def check_winner(board):
+def verifie_gagnant(board):
     lines = []
     for i in range(3):
         lines.append([(i, 0), (i, 1), (i, 2)])
@@ -57,21 +57,21 @@ def check_winner(board):
             return va, line
     return None, []
 
-def check_tie(board):
+def verifie_nul(board):
     return all(board[x][y] != "" for x in range(3) for y in range(3))
 
-def play_move(i, j, player):
+def jouer_coup(i, j, player):
     if st.session_state.board[i][j] != "" or st.session_state.winner:
         return
     st.session_state.board[i][j] = player
-    w, cells = check_winner(st.session_state.board)
+    w, cells = verifie_gagnant(st.session_state.board)
     if w:
         st.session_state.winner = w
         st.session_state.winning_cells = cells
-    elif check_tie(st.session_state.board):
+    elif verifie_nul(st.session_state.board):
         st.session_state.winner = "Tie"
 
-def reset():
+def renitialisation():
     st.session_state.board = [["" for _ in range(3)] for _ in range(3)]
     st.session_state.winner = None
     st.session_state.winning_cells = []
@@ -79,10 +79,10 @@ def reset():
 
 # --- Minimax IA ---
 def minimax(board, depth, is_maximizing):
-    winner, _ = check_winner(board)
+    winner, _ = verifie_gagnant(board)
     if winner == "B": return 1
     if winner == "R": return -1
-    if check_tie(board): return 0
+    if verifie_nul(board): return 0
 
     if is_maximizing:  # ordinateur
         best_score = -999
@@ -105,7 +105,7 @@ def minimax(board, depth, is_maximizing):
                     best_score = min(best_score, score)
         return best_score
 
-def best_move():
+def meilleur_coup():
     best_score = -999
     move = None
     for i in range(3):
@@ -120,7 +120,7 @@ def best_move():
     return move
 
 # --- Choix IA selon difficulté ---
-def computer_play():
+def tour_ordinateur():
     if st.session_state.winner:
         return
     empty = [(i, j) for i in range(3) for j in range(3) if st.session_state.board[i][j] == ""]
@@ -133,20 +133,20 @@ def computer_play():
         if random.random() < 0.5:  # moitié du temps hasard
             move = random.choice(empty)
         else:
-            move = best_move()
+            move = meilleur_coup()
     else:  # Difficile
-        move = best_move()
+        move = meilleur_coup()
 
     if move:
         time.sleep(0.5)  # délai visuel pour simuler réflexion
-        play_move(move[0], move[1], "B")
+        jouer_coup(move[0], move[1], "B")
 
 # --- Init ---
-init_state()
+etat_iniale()
 
 # --- L'IA joue si en attente ---
 if st.session_state.pending_ai and st.session_state.winner is None:
-    computer_play()
+    tour_ordinateur()
     st.session_state.pending_ai = False
 
 # --- UI ---
@@ -181,23 +181,23 @@ with col2:
         for j in range(3):
             key = f"btn_{i}_{j}"
             cell = st.session_state.board[i][j]
-            label = symbol(cell)
+            label = symbole(cell)
             if (i, j) in st.session_state.winning_cells:
                 label = "⭐ " + label
             disabled = cell != "" or st.session_state.winner is not None
             if cols[j].button(label, key=key, disabled=disabled):
-                play_move(i, j, "R")
+                jouer_coup(i, j, "R")
                 if st.session_state.winner is None:
                     st.session_state.pending_ai = True
                 st.rerun()
 
     st.write("")
-    board_lines = [" | ".join(symbol(c) for c in row) for row in st.session_state.board]
+    board_lines = [" | ".join(symbole(c) for c in row) for row in st.session_state.board]
     st.text("\n".join(board_lines))
 
     st.write("")
     if st.button("🔁 Recommencer"):
-        reset()
+        renitialisation()
         st.rerun()
 
 st.write("---")
