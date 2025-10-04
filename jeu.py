@@ -58,7 +58,7 @@ def jouer_coup(i, j, joueur):
         st.session_state.gagnant = w
         st.session_state.cellule_gagnant = cellules
     elif verifie_egalite(st.session_state.bordure):
-        st.session_state.gagnant = "Egalité"
+        st.session_state.gagnant = "Egalite"
 
 def reset():
     st.session_state.bordure = [["" for _ in range(3)] for _ in range(3)]
