@@ -4,7 +4,7 @@ Created on Sat Oct  4 14:23:52 2025
 
 @author: mokrane
 """
-
+import io
 import streamlit as st
 from pulp import LpMaximize, LpMinimize, LpProblem, LpVariable, LpStatus
 import re
@@ -130,13 +130,14 @@ def main():
 
         # Résolution
         probleme.solve()
-
+      
         # Affichage des résultats
         st.subheader("📊 Résultats")
         st.write(f"**Statut :** {LpStatus[probleme.status]}")
-        st.write("Statut : **(LpStatus[model.status]")
+        st.write("Statut : ** {LpStatus[model.status]}")
         resultats = {var.name: var.varValue for var in lp_vars.values()}
         st.table(resultats.items())
+        
 
         st.success(f"**Valeur optimale = {probleme.objective.value():.3f}**")
 
