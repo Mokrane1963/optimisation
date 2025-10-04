@@ -150,7 +150,8 @@ st.markdown("""
   </p>
 </div>
 """, unsafe_allow_html=True)
-st.title(" Thlatha da ")
+st.markdown("<h1 style='text-align: center;'>Thlatha da</h1>", unsafe_allow_html=True)
+
 st.write("Vous jouez 🔴. L’ordinateur joue 🔵.")
 
 # Sélecteur de difficulté
