@@ -134,7 +134,7 @@ def main():
         # Affichage des résultats
         st.subheader("📊 Résultats")
         st.write(f"**Statut :** {LpStatus[probleme.status]}")
-        st.write("Statut : ** {LpStatus[model.status]}")
+        
         resultats = {var.name: var.varValue for var in lp_vars.values()}
         st.table(resultats.items())
         
