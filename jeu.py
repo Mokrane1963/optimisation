@@ -139,8 +139,19 @@ if st.session_state.en_attente and st.session_state.gagnant is None:
     st.session_state.en_attente = False
 
 # --- UI ---
-st.title(" Joueur 🔴 vs Ordinateur 🤖")
-st.write("Vous jouez 🔵. L’ordinateur joue 🔵.")
+st.markdown("""
+<div style="text-align: center; font-family: courier;">
+  <p style="color: #3366FF; 
+            font-weight: bold; 
+            font-size: 20px; 
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
+    Développé par: Hachemi Mokrane • Septembre 2025
+  </p>
+</div>
+""", unsafe_allow_html=True)
+st.title(" Thlatha da ")
+st.write("Vous jouez 🔴. L’ordinateur joue 🔵.")
 
 # Sélecteur de difficulté
 st.session_state.difficulte = st.radio(
