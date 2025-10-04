@@ -77,10 +77,10 @@ def main():
     modele_type = LpMaximize if modele_type_str == "Maximisation" else LpMinimize
 
     # Fonction objectif
-    expr_objectif = st.text_input("Entrez la fonction économique (ex: 3x + 5y + 2z) :", "")
+    expr_objectif = st.text_input("Entrez la fonction économique (ex: 3x + 5y + 2z) :","3x + 5y + 2z")
 
     # Nombre de contraintes
-    n_contraintes = st.number_input("Nombre de contraintes :", min_value=1, max_value=10, step=1, value=3)
+    n_contraintes = st.number_input("Nombre de contraintes :", min_value=1, max_value=10, step=1, value=4)
 
     contraintes = []
     for i in range(int(n_contraintes)):
