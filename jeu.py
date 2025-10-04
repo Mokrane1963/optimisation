@@ -10,174 +10,174 @@ import streamlit as st
 import random
 import time
 
-st.set_page_config(page_title="Morpion IA", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="Thlata da", page_icon="🤖", layout="centered")
 
-# --- Helpers ---
+# --- aide ---
 def init_state():
-    if "board" not in st.session_state:
-        st.session_state.board = [["" for _ in range(3)] for _ in range(3)]
-    if "winner" not in st.session_state:
-        st.session_state.winner = None
-    if "winning_cells" not in st.session_state:
-        st.session_state.winning_cells = []
-    if "pending_ai" not in st.session_state:
-        st.session_state.pending_ai = False
-    if "difficulty" not in st.session_state:
-        st.session_state.difficulty = "Moyen"
+    if "bordure" not in st.session_state:
+        st.session_state.bordure = [["" for _ in range(3)] for _ in range(3)]
+    if "gagnant" not in st.session_state:
+        st.session_state.gagnant = None
+    if "cellule_gagnant" not in st.session_state:
+        st.session_state.cellule_gagnant = []
+    if "en_attente" not in st.session_state:
+        st.session_state.en_attente = False
+    if "difficulte" not in st.session_state:
+        st.session_state.difficulte = "Moyen"
 
-def symbol(cell):
-    if cell == "R": return "🔴"
-    if cell == "B": return "🔵"
+def symbol(cellule):
+    if cellule == "R": return "🔴"
+    if cellule == "B": return "🔵"
     return "◻️"
 
-def check_winner(board):
-    lines = []
+def verifie_gagnant(bordure):
+    lignes = []
     for i in range(3):
-        lines.append([(i, 0), (i, 1), (i, 2)])
+        lignes.append([(i, 0), (i, 1), (i, 2)])
     for j in range(3):
-        lines.append([(0, j), (1, j), (2, j)])
-    lines.append([(0, 0), (1, 1), (2, 2)])
-    lines.append([(0, 2), (1, 1), (2, 0)])
+        lignes.append([(0, j), (1, j), (2, j)])
+    lignes.append([(0, 0), (1, 1), (2, 2)])
+    lignes.append([(0, 2), (1, 1), (2, 0)])
 
-    for line in lines:
-        a, b, c = line
-        va, vb, vc = board[a[0]][a[1]], board[b[0]][b[1]], board[c[0]][c[1]]
+    for ligne in lignes:
+        a, b, c = ligne
+        va, vb, vc = bordure[a[0]][a[1]], bordure[b[0]][b[1]], bordure[c[0]][c[1]]
         if va != "" and va == vb == vc:
-            return va, line
+            return va, ligne
     return None, []
 
-def check_tie(board):
-    return all(board[x][y] != "" for x in range(3) for y in range(3))
+def verifie_egalite(bordure):
+    return all(bordure[x][y] != "" for x in range(3) for y in range(3))
 
-def play_move(i, j, player):
-    if st.session_state.board[i][j] != "" or st.session_state.winner:
+def jouer_coup(i, j, joueur):
+    if st.session_state.bordure[i][j] != "" or st.session_state.gagnant:
         return
-    st.session_state.board[i][j] = player
-    w, cells = check_winner(st.session_state.board)
+    st.session_state.bordure[i][j] = joueur
+    w, cellules = verifie_gagnant(st.session_state.bordure)
     if w:
-        st.session_state.winner = w
-        st.session_state.winning_cells = cells
-    elif check_tie(st.session_state.board):
-        st.session_state.winner = "Tie"
+        st.session_state.gagnant = w
+        st.session_state.cellule_gagnant = cellules
+    elif verifie_egalite(st.session_state.bordure):
+        st.session_state.gagnant = "Egalité"
 
 def reset():
-    st.session_state.board = [["" for _ in range(3)] for _ in range(3)]
-    st.session_state.winner = None
-    st.session_state.winning_cells = []
-    st.session_state.pending_ai = False
+    st.session_state.bordure = [["" for _ in range(3)] for _ in range(3)]
+    st.session_state.gagnant = None
+    st.session_state.cellule_gagnant = []
+    st.session_state.en_attente = False
 
-# --- Minimax IA ---
-def minimax(board, depth, is_maximizing):
-    winner, _ = check_winner(board)
-    if winner == "B": return 1
-    if winner == "R": return -1
-    if check_tie(board): return 0
+# --- Minimax ---
+def minimax(bordure, profendeur, est_maximum):
+    gagnant, _ = verifie_gagnant(bordure)
+    if gagnant == "B": return 1
+    if gagnant == "R": return -1
+    if verifie_egalite(bordure): return 0
 
-    if is_maximizing:  # ordinateur
-        best_score = -999
+    if est_maximum:  # ordinateur
+        meilleur_score = -999
         for i in range(3):
             for j in range(3):
-                if board[i][j] == "":
-                    board[i][j] = "B"
-                    score = minimax(board, depth + 1, False)
-                    board[i][j] = ""
-                    best_score = max(best_score, score)
-        return best_score
+                if bordure[i][j] == "":
+                    bordure[i][j] = "B"
+                    score = minimax(bordure, profendeur + 1, False)
+                    bordure[i][j] = ""
+                    meilleur_score = max(meilleur_score, score)
+        return meilleur_score
     else:  # joueur
-        best_score = 999
+        meilleur_score = 999
         for i in range(3):
             for j in range(3):
-                if board[i][j] == "":
-                    board[i][j] = "R"
-                    score = minimax(board, depth + 1, True)
-                    board[i][j] = ""
-                    best_score = min(best_score, score)
-        return best_score
+                if bordure[i][j] == "":
+                    bordure[i][j] = "R"
+                    score = minimax(bordure, profendeur + 1, True)
+                    bordure[i][j] = ""
+                    meilleur_score = min(meilleur_score, score)
+        return meilleur_score
 
-def best_move():
-    best_score = -999
-    move = None
+def meilleur_deplacement():
+    meilleur_score = -999
+    deplacement = None
     for i in range(3):
         for j in range(3):
-            if st.session_state.board[i][j] == "":
-                st.session_state.board[i][j] = "B"
-                score = minimax(st.session_state.board, 0, False)
-                st.session_state.board[i][j] = ""
-                if score > best_score:
-                    best_score = score
-                    move = (i, j)
-    return move
+            if st.session_state.bordure[i][j] == "":
+                st.session_state.bordure[i][j] = "B"
+                score = minimax(st.session_state.bordure, 0, False)
+                st.session_state.bordure[i][j] = ""
+                if score > meilleur_score:
+                    meilleur_score = score
+                    deplacement = (i, j)
+    return deplacement
 
 # --- Choix IA selon difficulté ---
-def computer_play():
-    if st.session_state.winner:
+def tour_ordinateur():
+    if st.session_state.gagnant:
         return
-    empty = [(i, j) for i in range(3) for j in range(3) if st.session_state.board[i][j] == ""]
-    if not empty: return
+    vide = [(i, j) for i in range(3) for j in range(3) if st.session_state.bordure[i][j] == ""]
+    if not vide: return
 
-    move = None
-    if st.session_state.difficulty == "Facile":
-        move = random.choice(empty)  # hasard total
-    elif st.session_state.difficulty == "Moyen":
+    deplacement = None
+    if st.session_state.difficulte == "Facile":
+        deplacement = random.choice(vide)  # hasard total
+    elif st.session_state.difficulte == "Moyen":
         if random.random() < 0.5:  # moitié du temps hasard
-            move = random.choice(empty)
+            deplacement = random.choice(vide)
         else:
-            move = best_move()
+            deplacement =meilleur_deplacement()
     else:  # Difficile
-        move = best_move()
+        deplacement =meilleur_deplacement()
 
-    if move:
+    if deplacement:
         time.sleep(0.5)  # délai visuel pour simuler réflexion
-        play_move(move[0], move[1], "B")
+        jouer_coup(deplacement[0], deplacement[1], "B")
 
 # --- Init ---
 init_state()
 
 # --- L'IA joue si en attente ---
-if st.session_state.pending_ai and st.session_state.winner is None:
-    computer_play()
-    st.session_state.pending_ai = False
+if st.session_state.en_attente and st.session_state.gagnant is None:
+    tour_ordinateur()
+    st.session_state.en_attente = False
 
 # --- UI ---
-st.title("Morpion — Joueur 🔴 vs Ordinateur 🤖")
-st.write("Vous jouez 🔴. L’ordinateur joue 🔵.")
+st.title(" Joueur 🔴 vs Ordinateur 🤖")
+st.write("Vous jouez 🔵. L’ordinateur joue 🔵.")
 
 # Sélecteur de difficulté
-st.session_state.difficulty = st.radio(
+st.session_state.difficulte = st.radio(
     "Difficulté de l’ordinateur :",
     ["Facile", "Moyen", "Difficile"],
-    index=["Facile", "Moyen", "Difficile"].index(st.session_state.difficulty)
+    index=["Facile", "Moyen", "Difficile"].index(st.session_state.difficulte)
 )
 
 col1, col2, col3 = st.columns([1,6,1])
 with col2:
-    if st.session_state.winner is None:
+    if st.session_state.gagnant is None:
         st.markdown("**À vous de jouer !**")
-    elif st.session_state.winner == "Tie":
+    elif st.session_state.gagnant == "Tie":
         st.markdown("**Match nul !**")
     else:
-        gagnant = "Vous (🔴)" if st.session_state.winner == "R" else "Ordinateur (🔵)"
+        gagnant = "Vous (🔴)" if st.session_state.gagnant == "🔴" else "Ordinateur (🔵)"
         st.markdown(f"**Gagnant : {gagnant} 🎉**")
 
     st.write("")
     for i in range(3):
-        cols = st.columns(3)
+        colonnes = st.columns(3)
         for j in range(3):
-            key = f"btn_{i}_{j}"
-            cell = st.session_state.board[i][j]
-            label = symbol(cell)
-            if (i, j) in st.session_state.winning_cells:
-                label = "⭐ " + label
-            disabled = cell != "" or st.session_state.winner is not None
-            if cols[j].button(label, key=key, disabled=disabled):
-                play_move(i, j, "R")   # joueur
-                if st.session_state.winner is None:
-                    st.session_state.pending_ai = True  # IA jouera au prochain cycle
+            cle = f"btn_{i}_{j}"
+            cellule = st.session_state.bordure[i][j]
+            etiquette = symbol(cellule)
+            if (i, j) in st.session_state.cellule_gagnant:
+                etiquette = "⭐ " + etiquette
+            desactive = cellule != "" or st.session_state.gagnant is not None
+            if colonnes[j].button(etiquette, cle=cle, desactive=desactive):
+                jouer_coup(i, j, "R")   # joueur
+                if st.session_state.gagnant is None:
+                    st.session_state.en_attente = True  # IA jouera au prochain cycle
                 st.rerun()  # montrer d'abord le coup du joueur
 
     st.write("")
-    board_lines = [" | ".join(symbol(c) for c in row) for row in st.session_state.board]
-    st.text("\n".join(board_lines))
+    bordure_lignes = [" | ".join(symbol(c) for c in row) for row in st.session_state.bordure]
+    st.text("\n".join(bordure_lignes))
 
     st.write("")
     if st.button("🔁 Recommencer"):
