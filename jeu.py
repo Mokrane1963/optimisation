@@ -34,7 +34,7 @@ def etat_iniale():
     if "en_attente" not in st.session_state:
         st.session_state.en_attente = False
     if "difficulte" not in st.session_state:
-        st.session_state.difficulte = "Moyen"
+        st.session_state.difficulte = "citoh"
 
 def symbole(cellule):
     if cellule == "R": return "🔴"
@@ -60,10 +60,10 @@ def verifie_gagnant(bordure):
 def verifie_nul(bordure):
     return all(bordure[x][y] != "" for x in range(3) for y in range(3))
 
-def jouer_coup(i, j, player):
+def jouer_coup(i, j, joueur):
     if st.session_state.bordure[i][j] != "" or st.session_state.gagnant:
         return
-    st.session_state.bordure[i][j] = player
+    st.session_state.bordure[i][j] = joueur
     w, cellules = verifie_gagnant(st.session_state.bordure)
     if w:
         st.session_state.gagnant = w
