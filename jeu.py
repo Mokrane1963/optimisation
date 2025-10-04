@@ -123,15 +123,15 @@ def meilleur_coup():
 def tour_ordinateur():
     if st.session_state.gagnant:
         return
-    empty = [(i, j) for i in range(3) for j in range(3) if st.session_state.bordure[i][j] == ""]
-    if not empty: return
+    vide = [(i, j) for i in range(3) for j in range(3) if st.session_state.bordure[i][j] == ""]
+    if not vide: return
 
     deplacement = None
-    if st.session_state.difficulte == "Facile":
-        deplacement = random.choice(empty)  # hasard total
-    elif st.session_state.difficulte == "Moyen":
+    if st.session_state.difficulte == "ishel":
+        deplacement = random.choice(vide)  # hasard total
+    elif st.session_state.difficulte == "citoh":
         if random.random() < 0.5:  # moitié du temps hasard
-            deplacement = random.choice(empty)
+            deplacement = random.choice(vide)
         else:
             deplacement = meilleur_coup()
     else:  # Difficile
