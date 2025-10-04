@@ -52,7 +52,7 @@ def main():
                 font-size: 20px; 
                 margin-top: 10px;
                 text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-       🔢 Résolution de problèmes linéaires à deux variables
+       🔢 Résolution de problèmes linéaires à trois variables
       </p>
     </div>
     """, unsafe_allow_html=True)
