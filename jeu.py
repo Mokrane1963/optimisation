@@ -163,13 +163,13 @@ with col2:
     for i in range(3):
         colonnes = st.columns(3)
         for j in range(3):
-            cle = f"btn_{i}_{j}"
+            key = f"btn_{i}_{j}"
             cellule = st.session_state.bordure[i][j]
             etiquette = symbol(cellule)
             if (i, j) in st.session_state.cellule_gagnant:
                 etiquette = "⭐ " + etiquette
-            desactive = cellule != "" or st.session_state.gagnant is not None
-            if colonnes[j].button(etiquette, cle=cle, desactive=desactive):
+            disabled = cellule != "" or st.session_state.gagnant is not None
+            if colonnes[j].button(etiquette, key=key, disabled=disabled):
                 jouer_coup(i, j, "R")   # joueur
                 if st.session_state.gagnant is None:
                     st.session_state.en_attente = True  # IA jouera au prochain cycle
