@@ -165,7 +165,7 @@ col1, col2, col3 = st.columns([1,6,1])
 with col2:
     if st.session_state.gagnant is None:
         st.markdown("**À vous de jouer !**")
-    elif st.session_state.gagnant == "egalite":
+    elif st.session_state.gagnant == "Egalite":
         st.markdown("**Match nul !**")
     else:
         gagnant = "Vous (🔴)" if st.session_state.gagnant == "R" else "Ordinateur (🔵)"
