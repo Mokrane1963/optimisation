@@ -38,7 +38,7 @@ def parse_expression(expr):
 # --- Application principale Streamlit ---
 def main():
     st.set_page_config(page_title="Solveur de Programmation Linéaire", layout="centered")
-  
+    st.title("🔢 Résolution de problèmes linéaires à trois variables")
 
     # ------------------------
     # Interface Streamlit
@@ -46,24 +46,13 @@ def main():
 
 
     st.markdown("""
-    <div style="text-align: center; font-family: courier;">
-      <p style="color: #8B4513; 
-                font-weight: bold; 
-                font-size: 20px; 
-                margin-top: 10px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-       🔢 Résolution de problèmes linéaires à trois variables
-      </p>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("""
     <div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
       <p style="color: #8B4513; 
                 font-weight: bold; 
                 font-size: 24px; 
                 margin-top: 10px;
                 text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-       ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
+       ⴰⵣⵓⵍ ⴼⴻⵍⴰⵡⴻⵏ
       </p>
     </div>
     """, unsafe_allow_html=True)
@@ -95,7 +84,7 @@ def main():
 
     contraintes = []
     for i in range(int(n_contraintes)):
-        contraintes.append(st.text_input(f"Contrainte {i+1} (ex: 2x + 3y <= 12) :", key=f"c{i}"))
+        contraintes.append(st.text_input(f"Contrainte {i+1} (ex: 2x + 3y +z <= 12, x>=0,y>=0,z>=0) :", key=f"c{i}"))
 
     if st.button("Résoudre"):
         if not expr_objectif.strip():
