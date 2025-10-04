@@ -14,32 +14,32 @@ import re
 # Configuration matplotlib pour Streamlit
 
 
-# Fonction de parsing pour les expressions linéaires
-def parse_expression(expr):
-    expr = expr.replace(" ", "")
-    terms = re.findall(r'([+-]?[\d.]*[a-zA-Z]+)', expr)
-    parsed = []
+# Fonction de parsing pour les expressionessions linéaires
+def analyse_syntaxique(expression):
+    expression = expression.replace(" ", "")
+    termes = re.findall(r'([+-]?[\d.]*[a-zA-Z]+)', expression)
+    analysee = []
     
-    for term in terms:
-        sign = 1
-        if term.startswith('-'):
-            sign = -1
-            term = term[1:]
-        elif term.startswith('+'):
-            term = term[1:]
+    for terme in termes:
+        signe = 1
+        if terme.startswith('-'):
+            signe = -1
+            terme = terme[1:]
+        elif terme.startswith('+'):
+            terme = terme[1:]
         
-        coeff_part = re.match(r'^[\d.]+', term)
-        var_part = term[len(coeff_part.group()):] if coeff_part else term
+        partie_coef = re.match(r'^[\d.]+', terme)
+        partie_variable = terme[len(partie_coef.group()):] if partie_coef else terme
         
-        coeff = float(coeff_part.group()) if coeff_part else 1.0
-        coeff *= sign
+        coeff = float(partie_coef.group()) if partie_coef else 1.0
+        coeff *= signe
         
-        if var_part:
-            parsed.append((coeff, var_part))
+        if partie_variable:
+            analysee.append((coeff, partie_variable))
     
-    return parsed
+    return analysee
 
-def plot_solution_graphique(contraintes, solution_x, solution_y, variables):
+def affichage_graphique(contraintes, solution_x, solution_y, variables):
     """Affichage graphique de la solution avec les données réelles"""
     
     # Création de la figure
@@ -55,7 +55,7 @@ def plot_solution_graphique(contraintes, solution_x, solution_y, variables):
     # Tracé des contraintes
     for i, (lhs, op, rhs) in enumerate(contraintes):
         if i < len(colors):  # Pour éviter l'index error si trop de contraintes
-            termes = parse_expression(lhs)
+            termes = analyse_syntaxique(lhs)
             if len(termes) == 2:
                 a, var1 = termes[0]
                 b, var2 = termes[1]
@@ -115,7 +115,7 @@ st.markdown("""
             font-weight: bold; 
             font-size: 24px; 
             margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
+            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
    ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
   </p>
 </div>
@@ -129,7 +129,7 @@ st.markdown("""
             font-weight: bold; 
             font-size: 18px; 
             margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
+            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
     Développé par: Hachemi Mokrane • Septembre 2025
   </p>
 </div>
@@ -163,23 +163,23 @@ if st.button("Résoudre"):
         # Type du problème
         if objectif.lower().startswith("max"):
             modele_type = LpMaximize
-            expr = objectif[3:].strip()
+            expression = objectif[3:].strip()
         elif objectif.lower().startswith("min"):
             modele_type = LpMinimize
-            expr = objectif[3:].strip()
+            expression = objectif[3:].strip()
         else:
             st.error("La fonction doit commencer par 'max' ou 'min'.")
             st.stop()
         
         probleme = LpProblem("Probleme_Lineaire", modele_type)
-        termes_objectif = parse_expression(expr)
+        termes_objectif = analyse_syntaxique(expression)
         
         # Collecte des variables
         variables = set()
         for coeff, var in termes_objectif:
             variables.add(var)
         for lhs, _, _ in contraintes:
-            for coeff, var in parse_expression(lhs):
+            for coeff, var in analyse_syntaxique(lhs):
                 variables.add(var)
         variables = sorted(variables)
         
@@ -195,13 +195,13 @@ if st.button("Résoudre"):
         
         # Contraintes
         for lhs, op, rhs in contraintes:
-            expr = sum(coeff * lp_vars[var] for coeff, var in parse_expression(lhs))
+            expression = sum(coeff * lp_vars[var] for coeff, var in analyse_syntaxique(lhs))
             if op == '<=':
-                probleme += expr <= rhs
+                probleme += expression <= rhs
             elif op == '>=':
-                probleme += expr >= rhs
+                probleme += expression >= rhs
             else:
-                probleme += expr == rhs
+                probleme += expression == rhs
         
         # Résolution
         probleme.solve()
@@ -238,7 +238,7 @@ if st.button("Résoudre"):
             st.subheader("📈 Représentation Graphique")
             try:
                 if x_val is not None and y_val is not None:
-                    fig = plot_solution_graphique(contraintes, x_val, y_val, variables)
+                    fig = affichage_graphique(contraintes, x_val, y_val, variables)
                     st.pyplot(fig)
                     
                     # Explication du graphique
@@ -266,7 +266,7 @@ with st.expander("ℹ️ Instructions d'utilisation"):
     st.markdown("""
     **Comment utiliser cette application :**
     
-    1. **Fonction économique** : Entrez "max" ou "min" suivi de l'expression (ex: `max 3x + 5y`)
+    1. **Fonction économique** : Entrez "max" ou "min" suivi de l'expressionession (ex: `max 3x + 5y`)
     2. **Nombre de contraintes** : Sélectionnez le nombre de contraintes
     3. **Contraintes** : Entrez chaque contrainte (ex: `2x + 3y <= 12`)
     4. **Graphique** : Cochez la case pour voir la représentation graphique
