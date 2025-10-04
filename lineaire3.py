@@ -38,12 +38,50 @@ def parse_expression(expr):
 # --- Application principale Streamlit ---
 def main():
     st.set_page_config(page_title="Solveur de Programmation Linéaire", layout="centered")
-    st.title("🧮 Solveur de Programmation Linéaire (3 variables ou plus)")
+  
+
+    # ------------------------
+    # Interface Streamlit
+    # ------------------------
+
 
     st.markdown("""
-    Ce solveur vous permet de résoudre des **problèmes linéaires** du type :
-    \n**max/min Z = ...** sous contraintes linéaires.
-    """)
+    <div style="text-align: center; font-family: courier;">
+      <p style="color: #8B4513; 
+                font-weight: bold; 
+                font-size: 20px; 
+                margin-top: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
+       🔢 Résolution de problèmes linéaires à deux variables
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
+      <p style="color: #8B4513; 
+                font-weight: bold; 
+                font-size: 24px; 
+                margin-top: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
+       ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+
+    st.markdown("""
+    <div style="text-align: center; font-family: courier;">
+      <p style="color: #3366FF; 
+                font-weight: bold; 
+                font-size: 18px; 
+                margin-top: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
+        Développé par: Hachemi Mokrane • Septembre 2025
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
 
     # Choix du type de problème
     modele_type_str = st.radio("Type de problème :", ["Maximisation", "Minimisation"])
