@@ -5,214 +5,108 @@ Created on Mon May  5 16:18:49 2025
 @author: mokrane
 """
 
-import streamlit as st
-from sklearn.linear_model import LinearRegression
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+import streamlit as st
 
-# ======================
-# Configuration Streamlit
-# ======================
-st.set_page_config(page_title="Modélisation TPC", layout="wide")
-st.title("🌿 Application de modélisation du TPC")
-st.markdown("Comparez différents modèles : Régression polynomiale, Réseau de neurones et Arbre de décision.")
+# ---------------------------------------------------
+# Configuration de la page
+# ---------------------------------------------------
+st.set_page_config(page_title="Régression Linéaire Interactive", page_icon="📈", layout="centered")
+st.title("📈 Régression Linéaire Interactive") 
+st.markdown("""
+    <div style="text-align: center; font-family: courier;">
+      <p style="color: #3366FF; 
+                font-weight: bold; 
+                font-size: 18px; 
+                margin-top: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
+        Développé par: Hachemi Mokrane • Septembre 2025
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+# ---------------------------------------------------
+# Section 1 : Saisie des données d'entraînement
+# ---------------------------------------------------
+st.header("1️⃣ Entrez vos données d'entraînement")
 
-# ======================
-# Fonctions principales
-# ======================
+col1, col2 = st.columns(2)
+with col1:
+    x_input = st.text_input("📏 Superficie de l’appartement (m²) — séparées par des virgules", "100, 200, 300", key="x_input")
+with col2:
+    y_input = st.text_input("💰 Prix de l’appartement (DZD) — séparées par des virgules", "900000, 1300000, 1700000", key="y_input")
 
-def génération_de_données(n_samples=20):
-    np.random.seed(42)
-    ethanol_concentration = np.random.choice([40, 60, 80], n_samples)
-    power_level = np.random.choice([500, 700, 900], n_samples)
-    extraction_time = np.random.choice([2, 4, 6], n_samples)
-    TPC = (0.0292554255319149 * ethanol_concentration - 0.0065865 * power_level -
-           1.24852127659574 * extraction_time + 72.5374138297872)
-    TPC = np.round(TPC, 3)
-    data = pd.DataFrame({
-        'ethanol_concentration': ethanol_concentration,
-        'power_level': power_level,
-        'extraction_time': extraction_time,
-        'TPC': TPC
-    })
-    return data
+# ---------------------------------------------------
+# Traitement des données
+# ---------------------------------------------------
+try:
+    x_train = np.array([float(x.strip()) for x in x_input.split(',')]).reshape(-1, 1)
+    y_train = np.array([float(y.strip()) for y in y_input.split(',')])
 
-def préparation_de_données(data):
-    X = data[['ethanol_concentration', 'power_level', 'extraction_time']]
-    Y = data['TPC']
-    scaler = MinMaxScaler()
-    X_scaled = scaler.fit_transform(X)
-    return X, Y, X_scaled, scaler
+    if len(x_train) != len(y_train):
+        st.error("⚠️ Le nombre de valeurs X et Y doit être identique.")
 
-def entraîner_une_régression_polynomiale(X, Y, degree=1):
-    poly = PolynomialFeatures(degree=degree, include_bias=True)
-    X_poly = poly.fit_transform(X)
-    model_poly = LinearRegression()
-    model_poly.fit(X_poly, Y)
-    y_pred = model_poly.predict(X_poly)
-    r2_poly = r2_score(Y, y_pred)
-    return model_poly, poly, y_pred, r2_poly
+    else:
+        # Entraînement du modèle
+        model = LinearRegression()
+        model.fit(x_train, y_train)
 
-def entraîner_réseau_de_neurone(X_scaled, Y, epochs=50, batch_size=1):
-    model_nn = Sequential([
-        Dense(3, input_dim=3, activation='relu'),
-        Dense(10, activation='relu'),
-        Dense(1, activation='linear')
-    ])
-    optimizer = Adam(learning_rate=0.1)
-    model_nn.compile(optimizer=optimizer, loss='mean_squared_error')
-    history = model_nn.fit(X_scaled, Y, epochs=epochs, batch_size=batch_size,
-                           verbose=0, validation_split=0.2)
-    predictions_nn = model_nn.predict(X_scaled)
-    r2_nn = r2_score(Y, predictions_nn)
-    return model_nn, history, predictions_nn, r2_nn
+        # Préparation des données pour le graphique
+        x_range = np.linspace(x_train.min(), x_train.max(), 100).reshape(-1, 1)
+        y_range = model.predict(x_range)
 
-def entraîner_arbre_de_décision(X, Y):
-    tree_model = DecisionTreeRegressor()
-    tree_model.fit(X, Y)
-    tree_predictions = tree_model.predict(X)
-    r2_tree = r2_score(Y, tree_predictions)
-    return tree_model, tree_predictions, r2_tree
-
-# ======================
-# Interface Streamlit
-# ======================
-
-# Génération de données
-n_samples = st.sidebar.slider("Nombre d’échantillons", 10, 100, 20)
-data = génération_de_données(n_samples)
-st.subheader("📋 Données générées")
-st.dataframe(data)
-
-# Préparation
-X, Y, X_scaled, scaler = préparation_de_données(data)
-
-# Paramètres des modèles
-st.sidebar.header("Paramètres des modèles")
-degree = st.sidebar.slider("Degré du polynôme", 1, 5, 1)
-epochs = st.sidebar.slider("Époques (réseau de neurones)", 10, 200, 50)
-batch_size = st.sidebar.slider("Taille du batch", 1, 10, 1)
-
-# Sélecteur de modèle
-model_choice = st.sidebar.radio(
-    "Choisissez le modèle à entraîner / tester",
-    ("Régression polynomiale", "Réseau de neurones", "Arbre de décision", "Comparer tous")
-)
-
-# Stockage dans session_state
-if "models_trained" not in st.session_state:
-    st.session_state.models_trained = False
-    st.session_state.model_poly = None
-    st.session_state.model_nn = None
-    st.session_state.tree_model = None
-    st.session_state.poly = None
-    st.session_state.history = None
-    st.session_state.scaler = scaler
-
-# ======================
-# Entraînement
-# ======================
-if st.button("🚀 Entraîner les modèles"):
-    with st.spinner("Entraînement en cours..."):
-        model_poly, poly, y_pred_poly, r2_poly = entraîner_une_régression_polynomiale(X, Y, degree)
-        model_nn, history, predictions_nn, r2_nn = entraîner_réseau_de_neurone(X_scaled, Y, epochs, batch_size)
-        tree_model, tree_predictions, r2_tree = entraîner_arbre_de_décision(X, Y)
-
-        # Stocker les modèles
-        st.session_state.models_trained = True
-        st.session_state.model_poly = model_poly
-        st.session_state.poly = poly
-        st.session_state.model_nn = model_nn
-        st.session_state.history = history
-        st.session_state.tree_model = tree_model
-        st.session_state.scaler = scaler
-        st.session_state.results = {
-            "r2_poly": r2_poly,
-            "r2_nn": r2_nn,
-            "r2_tree": r2_tree,
-            "y_pred_poly": y_pred_poly,
-            "predictions_nn": predictions_nn,
-            "tree_predictions": tree_predictions,
-        }
-
-    st.success("✅ Entraînement terminé !")
-
-# ======================
-# Affichage des résultats
-# ======================
-if st.session_state.models_trained:
-    results = st.session_state.results
-    model_poly = st.session_state.model_poly
-    model_nn = st.session_state.model_nn
-    tree_model = st.session_state.tree_model
-    poly = st.session_state.poly
-    history = st.session_state.history
-    scaler = st.session_state.scaler
-
-    # Comparaison
-    if model_choice == "Comparer tous":
-        st.subheader("📊 Comparaison des modèles")
-        col1, col2, col3 = st.columns(3)
-        col1.metric("R² Régression Polynomiale", f"{results['r2_poly']:.3f}")
-        col2.metric("R² Réseau de Neurones", f"{results['r2_nn']:.3f}")
-        col3.metric("R² Arbre de Décision", f"{results['r2_tree']:.3f}")
-
-    # Graphiques
-    if model_choice in ["Réseau de neurones", "Comparer tous"]:
-        st.subheader("📈 Courbe d’apprentissage du réseau de neurones")
+        # ---------------------------------------------------
+        # Affichage du graphique de régression
+        # ---------------------------------------------------
         fig, ax = plt.subplots()
-        ax.plot(history.history['loss'], label="Erreur d'entraînement")
-        if 'val_loss' in history.history:
-            ax.plot(history.history['val_loss'], label="Erreur de validation")
+        ax.scatter(x_train, y_train, color='red', label="Données d'entraînement")
+        ax.plot(x_range, y_range, color='blue', label="Ligne de régression")
+        ax.set_xlabel("Superficie (m²)")
+        ax.set_ylabel("Prix (DZD)")
+        ax.set_title("Régression Linéaire")
         ax.legend()
-        ax.set_xlabel("Époques")
-        ax.set_ylabel("MSE")
         st.pyplot(fig)
 
-    # ======================
-    # Prédiction interactive
-    # ======================
-    st.subheader("🧮 Prédire une nouvelle valeur")
-    ethanol = st.number_input("Concentration en éthanol (%)", 0, 100, 60)
-    power = st.number_input("Puissance (W)", 100, 1000, 700)
-    extraction = st.number_input("Temps d’extraction (min)", 1, 10, 4)
+        # ---------------------------------------------------
+        # Section 2 : Prédiction directe
+        # ---------------------------------------------------
+        st.header("2️⃣ Prédiction du prix")
 
-    if st.button("🔍 Faire une prédiction"):
-        nouvelle_entree = np.array([[ethanol, power, extraction]])
-        scaler = st.session_state.scaler
-        poly = st.session_state.poly
+        x_val = st.number_input("🏠 Quelle est la superficie (en m²) ?", min_value=0, value=120, key="x_val")
+        if st.button("🔮 Calculer le prix estimé", key="btn_predict"):
+            x_test = np.array([[x_val]])
+            y_pred = model.predict(x_test)
+            B = model.intercept_
+            m = model.coef_[0]
 
-        if model_choice == "Régression polynomiale":
-            X_poly = poly.transform(nouvelle_entree)
-            prediction = st.session_state.model_poly.predict(X_poly)[0]
-            st.info(f"🎯 TPC prédit (régression polynomiale) : **{prediction:.3f}**")
+            st.success(f"💰 Le prix estimé d’un logement de **{x_val} m²** est **{round(y_pred[0])} DZD**")
+            st.info(f"📏 Équation de la droite : y = {m:.2f}x + {B:.2f}")
 
-        elif model_choice == "Réseau de neurones":
-            X_scaled = scaler.transform(nouvelle_entree)
-            prediction = st.session_state.model_nn.predict(X_scaled)[0][0]
-            st.info(f"🧠 TPC prédit (réseau de neurones) : **{prediction:.3f}**")
+            # Graphique avec la prédiction
+            fig2, ax2 = plt.subplots()
+            ax2.scatter(x_train, y_train, color='green', label="Données d'entraînement")
+            ax2.plot(x_range, y_range, color='blue', label="Ligne de régression")
+            ax2.scatter(x_val, y_pred, color='red', lw=2, marker='x', s=100, label="Prédiction")
+            ax2.set_xlabel("Superficie (m²)")
+            ax2.set_ylabel("Prix (DZD)")
+            ax2.set_title("Régression Linéaire avec Prédiction")
+            ax2.legend()
+            st.pyplot(fig2)
 
-        elif model_choice == "Arbre de décision":
-            prediction = st.session_state.tree_model.predict(nouvelle_entree)[0]
-            st.info(f"🌳 TPC prédit (arbre de décision) : **{prediction:.3f}**")
+        # ---------------------------------------------------
+        # Section 3 : Calcul inverse (trouver la surface)
+        # ---------------------------------------------------
+        st.header("3️⃣ Calcul inverse")
 
-        elif model_choice == "Comparer tous":
-            X_poly = poly.transform(nouvelle_entree)
-            X_scaled = scaler.transform(nouvelle_entree)
-            pred_poly = st.session_state.model_poly.predict(X_poly)[0]
-            pred_nn = st.session_state.model_nn.predict(X_scaled)[0][0]
-            pred_tree = st.session_state.tree_model.predict(nouvelle_entree)[0]
+        prix_val = st.number_input("💰 Quel est le prix (en DZD) ?", min_value=0, value=1000000, key="prix_val")
+        if st.button("📏 Calculer la surface correspondante", key="btn_inverse"):
+            B = model.intercept_
+            m = model.coef_[0]
+            surface = (prix_val - B) / m
+            surface = round(surface, 2)
+            st.success(f"🏡 Le logement coûtant **{prix_val} DZD** a une surface estimée de **{surface} m²**")
 
-            st.success("✅ Prédictions multiples")
-            st.write(f"**Régression polynomiale :** {pred_poly:.3f}")
-            st.write(f"**Réseau de neurones :** {pred_nn:.3f}")
-            st.write(f"**Arbre de décision :** {pred_tree:.3f}")
-
+except ValueError:
+    st.error("❌ Veuillez entrer uniquement des valeurs numériques séparées par des virgules.")
 
