@@ -81,7 +81,17 @@ def entraîner_arbre_de_décision(X, Y):
 # ======================
 
 st.title("🌿 Application de modélisation du TPC avec différents modèles")
-
+st.markdown("""
+<div style="text-align: center; font-family: courier;">
+  <p style="color: #3366FF; 
+            font-weight: bold; 
+            font-size: 18px; 
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
+    Développé par: Hachemi Mokrane • Septembre 2025
+  </p>
+</div>
+""", unsafe_allow_html=True)
 # Génération de données
 n_samples = st.sidebar.slider("Nombre d’échantillons", 10, 100, 20)
 data = génération_de_données(n_samples)
