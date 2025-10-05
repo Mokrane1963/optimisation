@@ -17,10 +17,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+# ======================
+# Configuration Streamlit
+# ======================
 st.set_page_config(page_title="Modélisation TPC", layout="wide")
+st.title("🌿 Application de modélisation du TPC")
+st.markdown("Comparez différents modèles : Régression polynomiale, Réseau de neurones et Arbre de décision.")
 
 # ======================
-# Fonctions de base
+# Fonctions principales
 # ======================
 
 def génération_de_données(n_samples=20):
@@ -80,93 +85,133 @@ def entraîner_arbre_de_décision(X, Y):
 # Interface Streamlit
 # ======================
 
-st.title("🌿 Application de modélisation du TPC avec différents modèles")
-st.markdown("""
-<div style="text-align: center; font-family: courier;">
-  <p style="color: #3366FF; 
-            font-weight: bold; 
-            font-size: 18px; 
-            margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-    Développé par: Hachemi Mokrane • Septembre 2025
-  </p>
-</div>
-""", unsafe_allow_html=True)
 # Génération de données
 n_samples = st.sidebar.slider("Nombre d’échantillons", 10, 100, 20)
 data = génération_de_données(n_samples)
-st.subheader("Aperçu des données générées")
+st.subheader("📋 Données générées")
 st.dataframe(data)
 
-# Préparation des données
+# Préparation
 X, Y, X_scaled, scaler = préparation_de_données(data)
 
-# Paramètres utilisateur
+# Paramètres des modèles
 st.sidebar.header("Paramètres des modèles")
 degree = st.sidebar.slider("Degré du polynôme", 1, 5, 1)
 epochs = st.sidebar.slider("Époques (réseau de neurones)", 10, 200, 50)
 batch_size = st.sidebar.slider("Taille du batch", 1, 10, 1)
 
+# Sélecteur de modèle
+model_choice = st.sidebar.radio(
+    "Choisissez le modèle à entraîner / tester",
+    ("Régression polynomiale", "Réseau de neurones", "Arbre de décision", "Comparer tous")
+)
+
+# Stockage dans session_state
+if "models_trained" not in st.session_state:
+    st.session_state.models_trained = False
+    st.session_state.model_poly = None
+    st.session_state.model_nn = None
+    st.session_state.tree_model = None
+    st.session_state.poly = None
+    st.session_state.history = None
+    st.session_state.scaler = scaler
+
+# ======================
 # Entraînement
+# ======================
 if st.button("🚀 Entraîner les modèles"):
     with st.spinner("Entraînement en cours..."):
         model_poly, poly, y_pred_poly, r2_poly = entraîner_une_régression_polynomiale(X, Y, degree)
         model_nn, history, predictions_nn, r2_nn = entraîner_réseau_de_neurone(X_scaled, Y, epochs, batch_size)
         tree_model, tree_predictions, r2_tree = entraîner_arbre_de_décision(X, Y)
 
-        # Résultats
-        st.success("✅ Entraînement terminé !")
+        # Stocker les modèles
+        st.session_state.models_trained = True
+        st.session_state.model_poly = model_poly
+        st.session_state.poly = poly
+        st.session_state.model_nn = model_nn
+        st.session_state.history = history
+        st.session_state.tree_model = tree_model
+        st.session_state.scaler = scaler
+        st.session_state.results = {
+            "r2_poly": r2_poly,
+            "r2_nn": r2_nn,
+            "r2_tree": r2_tree,
+            "y_pred_poly": y_pred_poly,
+            "predictions_nn": predictions_nn,
+            "tree_predictions": tree_predictions,
+        }
 
-        results = pd.DataFrame({
-            'Ethanol (%)': X.iloc[:, 0],
-            'Puissance (W)': X.iloc[:, 1],
-            'Temps (min)': X.iloc[:, 2],
-            'TPC Réel': Y,
-            'Rég. Poly': np.round(y_pred_poly, 3),
-            'Réseau Neurones': np.round(predictions_nn.flatten(), 3),
-            'Arbre Décision': np.round(tree_predictions, 3)
-        })
+    st.success("✅ Entraînement terminé !")
 
-        st.subheader("📊 Résultats comparatifs")
-        st.dataframe(results)
+# ======================
+# Affichage des résultats
+# ======================
+if st.session_state.models_trained:
+    results = st.session_state.results
+    model_poly = st.session_state.model_poly
+    model_nn = st.session_state.model_nn
+    tree_model = st.session_state.tree_model
+    poly = st.session_state.poly
+    history = st.session_state.history
+    scaler = st.session_state.scaler
 
+    # Comparaison
+    if model_choice == "Comparer tous":
+        st.subheader("📊 Comparaison des modèles")
         col1, col2, col3 = st.columns(3)
-        col1.metric("R² Régression Polynomiale", f"{r2_poly:.3f}")
-        col2.metric("R² Réseau de Neurones", f"{r2_nn:.3f}")
-        col3.metric("R² Arbre de Décision", f"{r2_tree:.3f}")
+        col1.metric("R² Régression Polynomiale", f"{results['r2_poly']:.3f}")
+        col2.metric("R² Réseau de Neurones", f"{results['r2_nn']:.3f}")
+        col3.metric("R² Arbre de Décision", f"{results['r2_tree']:.3f}")
 
-        # Graphiques
+    # Graphiques
+    if model_choice in ["Réseau de neurones", "Comparer tous"]:
         st.subheader("📈 Courbe d’apprentissage du réseau de neurones")
         fig, ax = plt.subplots()
         ax.plot(history.history['loss'], label="Erreur d'entraînement")
         if 'val_loss' in history.history:
             ax.plot(history.history['val_loss'], label="Erreur de validation")
-        ax.set_xlabel("Époques")
-        ax.set_ylabel("Erreur quadratique moyenne")
         ax.legend()
+        ax.set_xlabel("Époques")
+        ax.set_ylabel("MSE")
         st.pyplot(fig)
 
-        st.subheader("📉 Comparaison des prédictions")
-        fig2, ax2 = plt.subplots()
-        ax2.plot(Y.values, label="Valeurs réelles", marker='o')
-        ax2.plot(predictions_nn, label="Réseau de neurones", linestyle='--', marker='x')
-        ax2.plot(tree_predictions, label="Arbre de décision", linestyle='--', marker='*')
-        ax2.legend()
-        st.pyplot(fig2)
+    # ======================
+    # Prédiction interactive
+    # ======================
+    st.subheader("🧮 Prédire une nouvelle valeur")
+    ethanol = st.number_input("Concentration en éthanol (%)", 0, 100, 60)
+    power = st.number_input("Puissance (W)", 100, 1000, 700)
+    extraction = st.number_input("Temps d’extraction (min)", 1, 10, 4)
 
-        # Section de prédiction interactive
-        st.subheader("🧮 Prédire de nouvelles valeurs")
-        ethanol = st.number_input("Concentration en éthanol (%)", min_value=0, max_value=100, value=60)
-        power = st.number_input("Puissance (W)", min_value=100, max_value=1000, value=700)
-        extraction = st.number_input("Temps d’extraction (min)", min_value=1, max_value=10, value=4)
-
+    if st.button("🔍 Faire une prédiction"):
         nouvelle_entree = np.array([[ethanol, power, extraction]])
-        nouvelle_entree_poly = poly.transform(nouvelle_entree)
-        prediction_poly = model_poly.predict(nouvelle_entree_poly)
-        nouvelle_entree_scaled = scaler.transform(nouvelle_entree)
-        prediction_nn = model_nn.predict(nouvelle_entree_scaled)
-        prediction_arbre = tree_model.predict(nouvelle_entree)
+        scaler = st.session_state.scaler
+        poly = st.session_state.poly
 
-        st.write(f"**Régression polynomiale :** {prediction_poly[0]:.3f}")
-        st.write(f"**Réseau de neurones :** {prediction_nn[0][0]:.3f}")
-        st.write(f"**Arbre de décision :** {prediction_arbre[0]:.3f}")
+        if model_choice == "Régression polynomiale":
+            X_poly = poly.transform(nouvelle_entree)
+            prediction = st.session_state.model_poly.predict(X_poly)[0]
+            st.info(f"🎯 TPC prédit (régression polynomiale) : **{prediction:.3f}**")
+
+        elif model_choice == "Réseau de neurones":
+            X_scaled = scaler.transform(nouvelle_entree)
+            prediction = st.session_state.model_nn.predict(X_scaled)[0][0]
+            st.info(f"🧠 TPC prédit (réseau de neurones) : **{prediction:.3f}**")
+
+        elif model_choice == "Arbre de décision":
+            prediction = st.session_state.tree_model.predict(nouvelle_entree)[0]
+            st.info(f"🌳 TPC prédit (arbre de décision) : **{prediction:.3f}**")
+
+        elif model_choice == "Comparer tous":
+            X_poly = poly.transform(nouvelle_entree)
+            X_scaled = scaler.transform(nouvelle_entree)
+            pred_poly = st.session_state.model_poly.predict(X_poly)[0]
+            pred_nn = st.session_state.model_nn.predict(X_scaled)[0][0]
+            pred_tree = st.session_state.tree_model.predict(nouvelle_entree)[0]
+
+            st.success("✅ Prédictions multiples")
+            st.write(f"**Régression polynomiale :** {pred_poly:.3f}")
+            st.write(f"**Réseau de neurones :** {pred_nn:.3f}")
+            st.write(f"**Arbre de décision :** {pred_tree:.3f}")
+
