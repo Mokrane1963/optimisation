@@ -1,15 +1,28 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep 26 16:26:28 2025
+Created on Thu Oct  9 20:26:14 2025
 
 @author: mokrane
 """
+
 import sympy as sp
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 from pulp import LpMaximize, LpMinimize, LpProblem, LpVariable, LpStatus
 import re
+
+# ==============================
+# Fonction de correction automatique
+# ==============================
+def corriger_saisie(expr: str) -> str:
+    """Corrige les erreurs de saisie communes dans les expressions."""
+    expr = expr.lower().replace(" ", "")
+    expr = expr.replace("et", "y")   # corrige les autocorrections "et"
+    expr = expr.replace("ans", "y")  # corrige les "ans"
+    expr = re.sub(r'(\d)([a-zA-Z])', r'\1*\2', expr)  # ajoute le * entre nombre et variable
+    return expr
+
 
 # ==============================
 # Fonction de parsing linéaire
@@ -37,6 +50,7 @@ def analyse_syntaxique(expression):
             analysee.append((coeff, partie_variable))
     
     return analysee
+
 
 # ==============================
 # Affichage graphique
@@ -85,33 +99,23 @@ def affichage_graphique(contraintes, solution_x, solution_y, variables):
 # ==============================
 # Interface Streamlit
 # ==============================
+st.set_page_config(page_title="Optimisation linéaire", page_icon="🔢", layout="centered")
 
-# --- 🎨 Bloc du testeur de dégradé ---
-st.sidebar.header("🎨 Fond dégradé de la page")
-
-gradient_type = st.sidebar.selectbox(
-    "Type de dégradé",
-    ["linear-gradient", "radial-gradient"]
-)
-
-angle = st.sidebar.slider("Angle (degrés)", 0, 360, 135)
+# 🎨 Dégradé dynamique
+st.sidebar.header("🎨 Fond dégradé")
+gradient_type = st.sidebar.selectbox("Type de dégradé", ["linear-gradient", "radial-gradient"])
+angle = st.sidebar.slider("Angle (°)", 0, 360, 135)
 color1 = st.sidebar.color_picker("Couleur 1", "#1E3C72")
 color2 = st.sidebar.color_picker("Couleur 2", "#2A5298")
 color3 = st.sidebar.color_picker("Couleur 3 (optionnelle)", "#00C9FF")
 use_three_colors = st.sidebar.checkbox("Utiliser 3 couleurs", value=False)
 
 if gradient_type == "linear-gradient":
-    if use_three_colors:
-        gradient = f"linear-gradient({angle}deg, {color1}, {color2}, {color3})"
-    else:
-        gradient = f"linear-gradient({angle}deg, {color1}, {color2})"
+    gradient = f"linear-gradient({angle}deg, {color1}, {color2}{',' + color3 if use_three_colors else ''})"
 else:
-    if use_three_colors:
-        gradient = f"radial-gradient(circle, {color1}, {color2}, {color3})"
-    else:
-        gradient = f"radial-gradient(circle, {color1}, {color2})"
+    gradient = f"radial-gradient(circle, {color1}, {color2}{',' + color3 if use_three_colors else ''})"
 
-page_bg = f"""
+st.markdown(f"""
 <style>
 [data-testid="stAppViewContainer"] {{
     background: {gradient};
@@ -124,52 +128,20 @@ h1, h2, h3, p {{
     color: white;
 }}
 </style>
-"""
-st.markdown(page_bg, unsafe_allow_html=True)
-
-#st.subheader("🧾 Code CSS généré :")
-#st.code(gradient, language="css")
-
-# --- Reste de ton application ---
-st.markdown("""
-<div style="text-align: center; font-family: courier;">
-  <p style="color: #8B4513; font-weight: bold; font-size: 20px; margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-   🔢 Résolution de problèmes linéaires à deux variables
-  </p>
-</div>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
-  <p style="color: #726B1E; font-weight: bold; font-size: 24px; margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-   ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
-  </p>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="text-align: center; font-family: courier;">
-  <p style="color: #3366FF; font-weight: bold; font-size: 18px; margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-    Développé par: Hachemi Mokrane • Septembre 2025
-  </p>
-</div>
-""", unsafe_allow_html=True)
+# --- En-tête ---
+st.markdown("<h2 style='text-align:center;'>🔹 Résolution de problèmes linéaires à deux variables</h2>", unsafe_allow_html=True)
 
 # ==============================
 # Entrées utilisateur
 # ==============================
-
-st.markdown("**Fonction économique max ou min suivi de : ax + by**")
-objectif = st.text_input("Fonction économique: ")  
-
+objectif = st.text_input("Fonction économique (ex: max 3x + 5y) :")
 n_contraintes = st.number_input("Nombre de contraintes", min_value=1, max_value=10, value=2, step=1)
 
 contraintes = []
 for i in range(n_contraintes):
-    contrainte = st.text_input(f"Contrainte {i+1} (ex: 2x + 3y <= 12)")  
+    contrainte = st.text_input(f"Contrainte {i+1} (ex: 2x + 3y <= 12)")
     if contrainte:
         for op in ['<=', '>=', '==', '=']:
             if op in contrainte:
@@ -177,7 +149,7 @@ for i in range(n_contraintes):
                 contraintes.append((lhs.strip(), op.strip(), float(rhs.strip())))
                 break
 
-afficher_graphique = st.checkbox("Afficher la représentation graphique")
+afficher_graphique = st.checkbox("Afficher le graphique")
 
 # ==============================
 # Résolution du problème
@@ -208,7 +180,7 @@ if st.button("Résoudre"):
         variables = sorted(variables)
         
         if len(variables) != 2:
-            st.error("⚠️ La résolution est disponible uniquement pour 2 variables (ex: x et y).")
+            st.error("⚠️ Cette application ne gère que 2 variables (x et y).")
             st.stop()
         
         lp_vars = LpVariable.dicts("Var", variables, lowBound=0)
@@ -228,79 +200,22 @@ if st.button("Résoudre"):
         st.subheader("Résultats de l'optimisation")
         st.write("**Statut :**", LpStatus[probleme.status])
         
-        solution = {}
-        for var in variables:
-            val = lp_vars[var].varValue
-            solution[var] = val
+        solution = {var: lp_vars[var].varValue for var in variables}
+        var1, var2 = variables
+        x_val, y_val = solution[var1], solution[var2]
         
-        if len(variables) == 2:
-            var1, var2 = variables
-            x_val = solution[var1]
-            y_val = solution[var2]
-            st.write(f"**Solution optimale :** ({var1};{var2}) = ({x_val:.2f};{y_val:.2f})")
+        st.write(f"**Solution optimale :** ({var1}, {var2}) = ({x_val:.2f}, {y_val:.2f})")
+        st.write(f"**Valeur optimale :** z = {probleme.objective.value():.2f}")
         
-        optimal_value = probleme.objective.value()
-        st.write(f"**Valeur optimale :** z = {optimal_value:.2f}")
-        
-        st.write("**Détail des valeurs :**")
-        for var in variables:
-            #st.write(f"- {var} = {solution[var]:.2f}")
-            st.markdown(f"<span style='color:#00C9FF;'>{var} = {solution[var]:.2f}</span>", unsafe_allow_html=True)
-        if afficher_graphique:
-            st.subheader("📈 Représentation Graphique")
-            try:
-                if x_val is not None and y_val is not None:
-                    fig = affichage_graphique(contraintes, x_val, y_val, variables)
-                    st.pyplot(fig)
-                    st.markdown("""
-<div style='color:white; font-size:16px;'>
-    <b>Légende du graphique :</b><br><br>
-    <ul style='list-style-type: none;'>
-        <li><span style='color:blue;'>●</span> <b>Lignes colorées</b> : contraintes</li>
-        <li><span style='color:lightgreen;'>⬛</span> <b>Zone ombrée</b> : zone réalisable</li>
-        <li><span style='color:red;'>●</span> <b>Point rouge</b> : solution optimale</li>
-    </ul>
-</div>
-""", unsafe_allow_html=True)
-                else:
-                    st.warning("Impossible d'afficher le graphique : solution non trouvée")
-            except Exception as e:
-                st.warning(f"Impossible d'afficher le graphique : {e}")
-        
-        st.markdown("---")
-        st.subheader("📋 Résumé")
-        
-        st.write("**Fonction économique :** ")
-        st.markdown(
-         f"<span style='color:#FFD700; font-weight:bold;'>{objectif}.</span> " ,
-         unsafe_allow_html=True)
+        # --- Affichage des contraintes corrigées ---
+        st.write("**Fonction économique :**")
+        st.latex(f"\\mathcal{{ {objectif}}}")
         st.write("**Contraintes :**")
         for i, (lhs, op, rhs) in enumerate(contraintes, 1):
-            st.markdown(
-              
-       f"<span style='color:#FFD700; font-weight:bold;'>{i}.</span> "
-       f"<span style='color:#00FFFF;'>{lhs}</span> "
-       f"<span style='color:white;'>{op}</span> "
-       f"<span style='color:#FFA500;'>{rhs}</span>",
-       unsafe_allow_html=True
-   )
+            lhs = corriger_saisie(lhs)
+            rhs = corriger_saisie(str(rhs))
+            st.latex(f"{i}.\\; {lhs} {op} {rhs}")
 
-# ==============================
-# Instructions
-# ==============================
-with st.expander("ℹ️ Instructions d'utilisation"):
-    st.markdown("""
-    **Comment utiliser cette application :**
-    
-    1. **Fonction économique** : Entrez "max" ou "min" suivi de l'expression (ex: `max 3x + 5y`)
-    2. **Nombre de contraintes**
-    3. **Contraintes** : Ex `2x + 3y <= 12`
-    4. **Graphique** : cochez la case
-    5. **Résoudre** : cliquez sur le bouton
-    
-    **Exemple complet :**
-    - Fonction : `min 35x + 34y`
-    - Contrainte 1 : `4x + 3y >= 504`
-    - Contrainte 2 : `5x + y >= 256`
-    - Contrainte 3 : `2x + 5y >= 240`
-    """)
+        if afficher_graphique:
+            fig = affichage_graphique(contraintes, x_val, y_val, variables)
+            st.pyplot(fig)
