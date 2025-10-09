@@ -11,10 +11,9 @@ import numpy as np
 from pulp import LpMaximize, LpMinimize, LpProblem, LpVariable, LpStatus
 import re
 
-# Configuration matplotlib pour Streamlit
-
-
-# Fonction de parsing pour les expressionessions linéaires
+# ==============================
+# Fonction de parsing linéaire
+# ==============================
 def analyse_syntaxique(expression):
     expression = expression.replace(" ", "")
     termes = re.findall(r'([+-]?[\d.]*[a-zA-Z]+)', expression)
@@ -39,51 +38,40 @@ def analyse_syntaxique(expression):
     
     return analysee
 
+# ==============================
+# Affichage graphique
+# ==============================
 def affichage_graphique(contraintes, solution_x, solution_y, variables):
-    """Affichage graphique de la solution avec les données réelles"""
-    
-    # Création de la figure
     fig, ax = plt.subplots(figsize=(10, 8))
-    
-    # Domaine des x
     x_max = max(solution_x * 2, 50) if solution_x > 0 else 50
     x_vals = np.linspace(0, x_max, 400)
-    
-    # Couleurs pour les différentes contraintes
     colors = ['blue', 'green', 'red', 'orange', 'purple']
     
-    # Tracé des contraintes
     for i, (lhs, op, rhs) in enumerate(contraintes):
-        if i < len(colors):  # Pour éviter l'index error si trop de contraintes
+        if i < len(colors):
             termes = analyse_syntaxique(lhs)
             if len(termes) == 2:
                 a, var1 = termes[0]
                 b, var2 = termes[1]
-                
-                if b != 0:  # Éviter division par zéro
+                if b != 0:
                     y_vals = (rhs - a * x_vals) / b
                     label = f'{lhs} {op} {rhs}'
                     ax.plot(x_vals, y_vals, label=label, linewidth=2, color=colors[i])
-                    
-                    # Remplissage selon l'opérateur
                     if op == '>=':
                         ax.fill_between(x_vals, y_vals, y_vals + 100, alpha=0.2, color=colors[i])
                     elif op == '<=':
                         ax.fill_between(x_vals, y_vals, 0, alpha=0.2, color=colors[i])
     
-    # Point solution
     if solution_x is not None and solution_y is not None:
         ax.plot(solution_x, solution_y, 'ro', markersize=10, 
                 label=f'Solution ({solution_x:.2f}, {solution_y:.2f})')
     
-    # Mise en forme
     ax.set_xlabel(variables[0] if variables else 'x')
     ax.set_ylabel(variables[1] if len(variables) > 1 else 'y')
     ax.set_title('Représentation Graphique de la Solution')
     ax.legend()
     ax.grid(True, alpha=0.3)
     
-    # Ajustement des limites
     if solution_x is not None and solution_y is not None:
         ax.set_xlim(0, max(solution_x * 1.5, 10))
         ax.set_ylim(0, max(solution_y * 1.5, 10))
@@ -93,56 +81,92 @@ def affichage_graphique(contraintes, solution_x, solution_y, variables):
     
     return fig
 
-# ------------------------
+
+# ==============================
 # Interface Streamlit
-# ------------------------
+# ==============================
 
+# --- 🎨 Bloc du testeur de dégradé ---
+st.sidebar.header("🎨 Fond dégradé de la page")
 
+gradient_type = st.sidebar.selectbox(
+    "Type de dégradé",
+    ["linear-gradient", "radial-gradient"]
+)
+
+angle = st.sidebar.slider("Angle (degrés)", 0, 360, 135)
+color1 = st.sidebar.color_picker("Couleur 1", "#1E3C72")
+color2 = st.sidebar.color_picker("Couleur 2", "#2A5298")
+color3 = st.sidebar.color_picker("Couleur 3 (optionnelle)", "#00C9FF")
+use_three_colors = st.sidebar.checkbox("Utiliser 3 couleurs", value=False)
+
+if gradient_type == "linear-gradient":
+    if use_three_colors:
+        gradient = f"linear-gradient({angle}deg, {color1}, {color2}, {color3})"
+    else:
+        gradient = f"linear-gradient({angle}deg, {color1}, {color2})"
+else:
+    if use_three_colors:
+        gradient = f"radial-gradient(circle, {color1}, {color2}, {color3})"
+    else:
+        gradient = f"radial-gradient(circle, {color1}, {color2})"
+
+page_bg = f"""
+<style>
+[data-testid="stAppViewContainer"] {{
+    background: {gradient};
+    background-attachment: fixed;
+}}
+[data-testid="stHeader"], [data-testid="stSidebar"], [data-testid="stToolbar"] {{
+    background: none !important;
+}}
+h1, h2, h3, p {{
+    color: white;
+}}
+</style>
+"""
+st.markdown(page_bg, unsafe_allow_html=True)
+
+#st.subheader("🧾 Code CSS généré :")
+#st.code(gradient, language="css")
+
+# --- Reste de ton application ---
 st.markdown("""
 <div style="text-align: center; font-family: courier;">
-  <p style="color: #8B4513; 
-            font-weight: bold; 
-            font-size: 20px; 
-            margin-top: 10px;
+  <p style="color: #8B4513; font-weight: bold; font-size: 20px; margin-top: 10px;
             text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
    🔢 Résolution de problèmes linéaires à deux variables
   </p>
 </div>
 """, unsafe_allow_html=True)
+
 st.markdown("""
 <div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
-  <p style="color: #8B4513; 
-            font-weight: bold; 
-            font-size: 24px; 
-            margin-top: 10px;
+  <p style="color: #8B4513; font-weight: bold; font-size: 24px; margin-top: 10px;
             text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
    ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
   </p>
 </div>
 """, unsafe_allow_html=True)
 
-
-
 st.markdown("""
 <div style="text-align: center; font-family: courier;">
-  <p style="color: #3366FF; 
-            font-weight: bold; 
-            font-size: 18px; 
-            margin-top: 10px;
+  <p style="color: #3366FF; font-weight: bold; font-size: 18px; margin-top: 10px;
             text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
     Développé par: Hachemi Mokrane • Septembre 2025
   </p>
 </div>
 """, unsafe_allow_html=True)
 
-# Choix max/min et saisie de la fonction objectif
+# ==============================
+# Entrées utilisateur
+# ==============================
+
 st.markdown("**Fonction économique max ou min suivi de : ax + by**")
 objectif = st.text_input("Fonction économique: ")  
 
-# Nombre de contraintes
 n_contraintes = st.number_input("Nombre de contraintes", min_value=1, max_value=10, value=2, step=1)
 
-# Saisie des contraintes
 contraintes = []
 for i in range(n_contraintes):
     contrainte = st.text_input(f"Contrainte {i+1} (ex: 2x + 3y <= 12)")  
@@ -153,14 +177,15 @@ for i in range(n_contraintes):
                 contraintes.append((lhs.strip(), op.strip(), float(rhs.strip())))
                 break
 
-# Option pour afficher le graphique
 afficher_graphique = st.checkbox("Afficher la représentation graphique")
 
+# ==============================
+# Résolution du problème
+# ==============================
 if st.button("Résoudre"):
     if not objectif:
         st.error("Veuillez entrer une fonction économique valide.")
     else:
-        # Type du problème
         if objectif.lower().startswith("max"):
             modele_type = LpMaximize
             expression = objectif[3:].strip()
@@ -174,7 +199,6 @@ if st.button("Résoudre"):
         probleme = LpProblem("Probleme_Lineaire", modele_type)
         termes_objectif = analyse_syntaxique(expression)
         
-        # Collecte des variables
         variables = set()
         for coeff, var in termes_objectif:
             variables.add(var)
@@ -187,13 +211,9 @@ if st.button("Résoudre"):
             st.error("⚠️ La résolution est disponible uniquement pour 2 variables (ex: x et y).")
             st.stop()
         
-        # Création des variables PuLP
         lp_vars = LpVariable.dicts("Var", variables, lowBound=0)
-        
-        # Fonction objectif
         probleme += sum(coeff * lp_vars[var] for coeff, var in termes_objectif)
         
-        # Contraintes
         for lhs, op, rhs in contraintes:
             expression = sum(coeff * lp_vars[var] for coeff, var in analyse_syntaxique(lhs))
             if op == '<=':
@@ -203,57 +223,46 @@ if st.button("Résoudre"):
             else:
                 probleme += expression == rhs
         
-        # Résolution
         probleme.solve()
         
-        # Résultats
         st.subheader("Résultats de l'optimisation")
         st.write("**Statut :**", LpStatus[probleme.status])
         
-        # Récupération des valeurs des variables
         solution = {}
         for var in variables:
             val = lp_vars[var].varValue
             solution[var] = val
         
-        # Formatage de l'affichage selon votre demande
         if len(variables) == 2:
             var1, var2 = variables
             x_val = solution[var1]
             y_val = solution[var2]
-            
-            # Affichage au format (x;y) z=
             st.write(f"**Solution optimale :** ({var1};{var2}) = ({x_val:.2f};{y_val:.2f})")
         
         optimal_value = probleme.objective.value()
         st.write(f"**Valeur optimale :** z = {optimal_value:.2f}")
         
-        # Affichage détaillé supplémentaire
         st.write("**Détail des valeurs :**")
         for var in variables:
             st.write(f"- {var} = {solution[var]:.2f}")
         
-        # Affichage du graphique si demandé
         if afficher_graphique:
             st.subheader("📈 Représentation Graphique")
             try:
                 if x_val is not None and y_val is not None:
                     fig = affichage_graphique(contraintes, x_val, y_val, variables)
                     st.pyplot(fig)
-                    
-                    # Explication du graphique
                     st.markdown("""
                     **Légende du graphique :**
-                    - **Lignes colorées** : Représentent les contraintes
-                    - **Zone ombrée** : Zone réalisable pour chaque contrainte
-                    - **Point rouge** : Solution optimale trouvée
+                    - **Lignes colorées** : contraintes  
+                    - **Zone ombrée** : zone réalisable  
+                    - **Point rouge** : solution optimale
                     """)
                 else:
                     st.warning("Impossible d'afficher le graphique : solution non trouvée")
             except Exception as e:
                 st.warning(f"Impossible d'afficher le graphique : {e}")
         
-        # Information supplémentaire
         st.markdown("---")
         st.subheader("📋 Résumé")
         st.write(f"**Fonction économique :** {objectif}")
@@ -261,16 +270,18 @@ if st.button("Résoudre"):
         for i, (lhs, op, rhs) in enumerate(contraintes, 1):
             st.write(f"{i}. {lhs} {op} {rhs}")
 
-# Instructions d'utilisation
+# ==============================
+# Instructions
+# ==============================
 with st.expander("ℹ️ Instructions d'utilisation"):
     st.markdown("""
     **Comment utiliser cette application :**
     
-    1. **Fonction économique** : Entrez "max" ou "min" suivi de l'expressionession (ex: `max 3x + 5y`)
-    2. **Nombre de contraintes** : Sélectionnez le nombre de contraintes
-    3. **Contraintes** : Entrez chaque contrainte (ex: `2x + 3y <= 12`)
-    4. **Graphique** : Cochez la case pour voir la représentation graphique
-    5. **Résoudre** : Cliquez sur le bouton "Résoudre"
+    1. **Fonction économique** : Entrez "max" ou "min" suivi de l'expression (ex: `max 3x + 5y`)
+    2. **Nombre de contraintes**
+    3. **Contraintes** : Ex `2x + 3y <= 12`
+    4. **Graphique** : cochez la case
+    5. **Résoudre** : cliquez sur le bouton
     
     **Exemple complet :**
     - Fonction : `min 35x + 34y`
