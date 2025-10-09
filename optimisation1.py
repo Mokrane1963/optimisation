@@ -4,7 +4,7 @@ Created on Fri Sep 26 16:26:28 2025
 
 @author: mokrane
 """
-import sympy as sp
+
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
