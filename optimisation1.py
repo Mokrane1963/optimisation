@@ -130,7 +130,7 @@ st.markdown(page_bg, unsafe_allow_html=True)
 #st.subheader("🧾 Code CSS généré :")
 #st.code(gradient, language="css")
 
-# --- Reste de ton application ---
+
 st.markdown("""
 <div style="text-align: center; font-family: courier;">
   <p style="color: #8B4513; font-weight: bold; font-size: 20px; margin-top: 10px;
