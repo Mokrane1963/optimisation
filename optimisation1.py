@@ -142,7 +142,7 @@ st.markdown("""
 
 st.markdown("""
 <div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
-  <p style="color: #8B4513; font-weight: bold; font-size: 24px; margin-top: 10px;
+  <p style="color: #726B1E; font-weight: bold; font-size: 24px; margin-top: 10px;
             text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
    ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
   </p>
