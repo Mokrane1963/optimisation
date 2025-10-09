@@ -91,7 +91,7 @@ st.sidebar.header("🎨 Fond dégradé de la page")
 
 gradient_type = st.sidebar.selectbox(
     "Type de dégradé",
-    ["Dégradé-linéaire", "Dégradé-radial"]
+    ["linear-gradient", "radial-gradient"]
 )
 
 angle = st.sidebar.slider("Angle (degrés)", 0, 360, 135)
@@ -100,16 +100,16 @@ color2 = st.sidebar.color_picker("Couleur 2", "#2A5298")
 color3 = st.sidebar.color_picker("Couleur 3 (optionnelle)", "#00C9FF")
 use_three_colors = st.sidebar.checkbox("Utiliser 3 couleurs", value=False)
 
-if gradient_type == "Dégradé-linéaire":
+if gradient_type == "linear-gradient":
     if use_three_colors:
-        gradient = f"Dégradé-linéaire({angle}deg, {color1}, {color2}, {color3})"
+        gradient = f"linear-gradient({angle}deg, {color1}, {color2}, {color3})"
     else:
-        gradient = f"Dégradé-linéairet({angle}deg, {color1}, {color2})"
+        gradient = f"linear-gradient({angle}deg, {color1}, {color2})"
 else:
     if use_three_colors:
-        gradient = f"Dégradé-radial(circle, {color1}, {color2}, {color3})"
+        gradient = f"radial-gradient(circle, {color1}, {color2}, {color3})"
     else:
-        gradient = f"Dégradé-radial(circle, {color1}, {color2})"
+        gradient = f"radial-gradient(circle, {color1}, {color2})"
 
 page_bg = f"""
 <style>
