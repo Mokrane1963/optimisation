@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pulp import LpMaximize, LpMinimize, LpProblem, LpVariable, LpStatus
 import re
-
+import io
 # ==============================
 # Fonction de parsing linéaire
 # ==============================
@@ -68,9 +68,14 @@ def affichage_graphique(contraintes, solution_x, solution_y, variables):
     
     ax.set_xlabel(variables[0] if variables else 'x')
     ax.set_ylabel(variables[1] if len(variables) > 1 else 'y')
-    ax.set_title('Représentation Graphique de la Solution')
+    ax.set_title("Zone réalisable et solution optimale", fontsize=16, fontweight='bold')
     ax.legend()
-    ax.grid(True, alpha=0.3)
+    ax.set_facecolor("#f8f9fa")
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.grid(True, linestyle='--', alpha=0.4)
+    
+  
     
     if solution_x is not None and solution_y is not None:
         ax.set_xlim(0, max(solution_x * 1.5, 10))
@@ -80,13 +85,62 @@ def affichage_graphique(contraintes, solution_x, solution_y, variables):
         ax.set_ylim(0, 50)
     
     return fig
-
+   
 
 # ==============================
 # Interface Streamlit
 # ==============================
 
+
 # --- 🎨 Bloc du testeur de dégradé ---
+st.sidebar.markdown("""
+<div style="text-align: center; font-family: 'Tifinaghe-Ircam Unicode sans serif';">
+  <p style="
+      color: #FFD700; 
+      font-weight: bold; 
+      font-size: 28px; 
+      margin-top: 5px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+   ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
+  </p>
+</div>
+""", unsafe_allow_html=True)
+# --- 🎨 Correction du style des boutons (visibilité sur fond sombre) ---
+st.markdown("""
+<style>
+/* Style général pour tous les boutons Streamlit */
+div.stButton > button, div.stDownloadButton > button {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: black !important;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6em 1.2em;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Effet au survol */
+div.stButton > button:hover, div.stDownloadButton > button:hover {
+    background: linear-gradient(135deg, #FFA500, #FF4500);
+    color: white !important;
+    box-shadow: 0 0 15px rgba(255, 140, 0, 0.6);
+    transform: scale(1.05);
+}
+
+/* Ajustement pour les boutons dans la sidebar */
+section[data-testid="stSidebar"] div.stButton > button {
+    background: linear-gradient(135deg, #00C9FF, #92FE9D);
+    color: black !important;
+}
+section[data-testid="stSidebar"] div.stButton > button:hover {
+    background: linear-gradient(135deg, #92FE9D, #00C9FF);
+    color: black !important;
+    transform: scale(1.05);
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.sidebar.header("🎨 Fond dégradé de la page")
 
 gradient_type = st.sidebar.selectbox(
@@ -140,14 +194,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
-  <p style="color: #726B1E; font-weight: bold; font-size: 24px; margin-top: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-   ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
-  </p>
-</div>
-""", unsafe_allow_html=True)
 
 st.markdown("""
 <div style="text-align: center; font-family: courier;">
@@ -162,8 +208,10 @@ st.markdown("""
 # Entrées utilisateur
 # ==============================
 
-st.markdown("**Fonction économique max ou min suivi de : ax + by**")
-objectif = st.text_input("Fonction économique: ")  
+#st.markdown("**Fonction économique max ou min suivi de : ax + by**")
+a, b = 3, 2
+objectif = st.text_input(f"Fonction économique min ou max :", value=f"max {a}x + {b}y")
+
 
 n_contraintes = st.number_input("Nombre de contraintes", min_value=1, max_value=10, value=2, step=1)
 
@@ -266,6 +314,21 @@ if st.button("Résoudre"):
                     st.warning("Impossible d'afficher le graphique : solution non trouvée")
             except Exception as e:
                 st.warning(f"Impossible d'afficher le graphique : {e}")
+                # 📥 Bouton de téléchargement du graphique
+            buf = io.BytesIO()
+            fig.savefig(buf, format="png", bbox_inches="tight")
+            buf.seek(0)  # 🔹 très important pour que le fichier soit lu depuis le début
+            st.download_button(
+                "📸 Télécharger le graphique",
+                data=buf,
+                file_name="graphique.png",
+                mime="image/png"
+            )
+
+
+            # Téléchargement des résultats
+            texte = f"Solution : {solution}\nValeur optimale : {optimal_value}"
+            st.download_button("📥 Télécharger les résultats", data=texte, file_name="resultats.txt")
         
         st.markdown("---")
         st.subheader("📋 Résumé")
@@ -284,7 +347,7 @@ if st.button("Résoudre"):
        f"<span style='color:#FFA500;'>{rhs}</span>",
        unsafe_allow_html=True
    )
-
+               
 # ==============================
 # Instructions
 # ==============================
