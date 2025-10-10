@@ -4,7 +4,7 @@ Created on Sat Oct  4 14:23:52 2025
 
 @author: mokrane
 """
-import io
+
 import streamlit as st
 from pulp import LpMaximize, LpMinimize, LpProblem, LpVariable, LpStatus
 import re
