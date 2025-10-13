@@ -8,6 +8,8 @@ Created on Sat Oct  4 14:23:52 2025
 import streamlit as st
 from pulp import LpMaximize, LpMinimize, LpProblem, LpVariable, LpStatus
 import re
+import pandas as pd
+
 
 # --- Fonction d’analyse d’une expression linéaire ---
 def parse_expression(expr):
@@ -40,52 +42,109 @@ def main():
     st.set_page_config(page_title="Solveur de Programmation Linéaire", layout="centered")
     st.title("🔢 Résolution de problèmes linéaires à trois variables")
 
-    # ------------------------
-    # Interface Streamlit
-    # ------------------------
-
-
-    st.markdown("""
-    <div style="text-align: center; font-family: Tifinaghe-Ircam Unicode sans serif;">
-      <p style="color: #8B4513; 
-                font-weight: bold; 
-                font-size: 24px; 
-                margin-top: 10px;
-                text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-       ⴰⵣⵓⵍ ⴼⴻⵍⴰⵡⴻⵏ
-      </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-
     st.markdown("""
     <div style="text-align: center; font-family: courier;">
-      <p style="color: #3366FF; 
-                font-weight: bold; 
-                font-size: 18px; 
-                margin-top: 10px;
+      <p style="color: #3366FF; font-weight: bold; font-size: 18px; margin-top: 10px;
                 text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
         Développé par: Hachemi Mokrane • Septembre 2025
       </p>
     </div>
     """, unsafe_allow_html=True)
 
+    # --- Bandeau Amazigh ---
+    st.sidebar.markdown("""
+    <div style="text-align: center; font-family: 'Tifinaghe-Ircam Unicode sans serif';">
+      <p style="
+          color: #FFD700; 
+          font-weight: bold; 
+          font-size: 28px; 
+          margin-top: 5px;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+       ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Choix du type de problème
+    # --- 🎨 Correction du style des boutons ---
+    st.markdown("""
+    <style>
+    div.stButton > button, div.stDownloadButton > button {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: black !important;
+        font-weight: bold;
+        border: none;
+        border-radius: 10px;
+        padding: 0.6em 1.2em;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    div.stButton > button:hover, div.stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #FFA500, #FF4500);
+        color: white !important;
+        box-shadow: 0 0 15px rgba(255, 140, 0, 0.6);
+        transform: scale(1.05);
+    }
+    section[data-testid="stSidebar"] div.stButton > button {
+        background: linear-gradient(135deg, #00C9FF, #92FE9D);
+        color: black !important;
+    }
+    section[data-testid="stSidebar"] div.stButton > button:hover {
+        background: linear-gradient(135deg, #92FE9D, #00C9FF);
+        color: black !important;
+        transform: scale(1.05);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # --- 🎨 Fond dégradé ---
+    st.sidebar.header("🎨 Fond dégradé de la page")
+    gradient_type = st.sidebar.selectbox("Type de dégradé", ["linear-gradient", "radial-gradient"])
+    angle = st.sidebar.slider("Angle (degrés)", 0, 360, 135)
+    color1 = st.sidebar.color_picker("Couleur 1", "#1E3C72")
+    color2 = st.sidebar.color_picker("Couleur 2", "#2A5298")
+    color3 = st.sidebar.color_picker("Couleur 3 (optionnelle)", "#00C9FF")
+    use_three_colors = st.sidebar.checkbox("Utiliser 3 couleurs", value=False)
+
+    if gradient_type == "linear-gradient":
+        if use_three_colors:
+            gradient = f"linear-gradient({angle}deg, {color1}, {color2}, {color3})"
+        else:
+            gradient = f"linear-gradient({angle}deg, {color1}, {color2})"
+    else:
+        if use_three_colors:
+            gradient = f"radial-gradient(circle, {color1}, {color2}, {color3})"
+        else:
+            gradient = f"radial-gradient(circle, {color1}, {color2})"
+
+    page_bg = f"""
+    <style>
+    [data-testid="stAppViewContainer"] {{
+        background: {gradient};
+        background-attachment: fixed;
+    }}
+    [data-testid="stHeader"], [data-testid="stSidebar"], [data-testid="stToolbar"] {{
+        background: none !important;
+    }}
+    h1, h2, h3, p {{
+        color: white;
+    }}
+    </style>
+    """
+    st.markdown(page_bg, unsafe_allow_html=True)
+
+    # === Paramètres du problème linéaire ===
     modele_type_str = st.radio("Type de problème :", ["Maximisation", "Minimisation"])
     modele_type = LpMaximize if modele_type_str == "Maximisation" else LpMinimize
 
-    # Fonction objectif
-    expr_objectif = st.text_input("Entrez la fonction économique (ex: 3x + 5y + 2z) :","3x + 5y + 2z")
+    expr_objectif = st.text_input("Entrez la fonction économique (ex: 3x + 5y + 2z) :", "3x + 5y + 2z")
 
-    # Nombre de contraintes
     n_contraintes = st.number_input("Nombre de contraintes :", min_value=1, max_value=10, step=1, value=4)
 
     contraintes = []
     for i in range(int(n_contraintes)):
-        contraintes.append(st.text_input(f"Contrainte {i+1} (ex: 2x + 3y +z <= 12, x>=0,y>=0,z>=0) :", key=f"c{i}"))
+        contraintes.append(st.text_input(f"Contrainte {i+1} (ex: 2x + 3y + z <= 12) :", key=f"c{i}"))
 
+    # === Résolution du problème ===
     if st.button("Résoudre"):
         if not expr_objectif.strip():
             st.error("Veuillez entrer la fonction économique.")
@@ -113,7 +172,7 @@ def main():
                 variables.add(var)
 
         # Création des variables PuLP
-        lp_vars = LpVariable.dicts("Var", variables, lowBound=0)
+        lp_vars = LpVariable.dicts("", variables, lowBound=0)
 
         # Ajout de la fonction objectif
         probleme += sum(coeff * lp_vars[var] for coeff, var in termes_objectif)
@@ -130,17 +189,25 @@ def main():
 
         # Résolution
         probleme.solve()
-      
-        # Affichage des résultats
-        st.subheader("📊 Résultats")
-        st.write(f"**Statut :** {LpStatus[probleme.status]}")
-        
-        resultats = {var.name: var.varValue for var in lp_vars.values()}
-        st.table(resultats.items())
-        
 
+        # --- Résultats ---
+        st.subheader("📊 Résultats du problème linéaire")
+        st.write(f"**Statut :** {LpStatus[probleme.status]}")
+
+        # Tableau des valeurs optimales
+        resultats = {var_name: v.varValue for var_name, v in lp_vars.items()}
+        df_resultats = pd.DataFrame({
+            "Variable": list(resultats.keys()),
+            "Valeur": list(resultats.values())
+        })
+
+        st.table(df_resultats)
+
+        # Valeur optimale
         st.success(f"**Valeur optimale = {probleme.objective.value():.3f}**")
 
 
+# --- Lancement de l'application ---
 if __name__ == "__main__":
     main()
+
