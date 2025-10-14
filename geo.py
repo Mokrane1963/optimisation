@@ -21,10 +21,8 @@ def telecharger_natural_earth():
     urls = {
         "countries": "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip",
         "sovereignty": "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_sovereignty.zip",
-        "cities": {
-           "url": "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_populated_places.zip",
-           "nom": "ne_10m_populated_places"
-       }
+      
+       
     }
 
     fichiers = {}
