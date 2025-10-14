@@ -11,22 +11,22 @@ import matplotlib.pyplot as plt
 import requests, zipfile, io, os
 
 # ==============================
-# 🔹 Fonction de téléchargement
+# 🔹 Téléchargement des données Natural Earth
 # ==============================
 @st.cache_data
 def telecharger_natural_earth():
     """Télécharge et extrait les shapefiles Natural Earth nécessaires."""
     dossiers = {
         "countries": {
-            "url": "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip",
+            "url": "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip",
             "nom": "ne_110m_admin_0_countries"
         },
         "sovereignty": {
-            "url": "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_sovereignty.zip",
+            "url": "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_sovereignty.zip",
             "nom": "ne_110m_admin_0_sovereignty"
         },
         "cities": {
-            "url": "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip",
+            "url": "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_populated_places.zip",
             "nom": "ne_10m_populated_places"
         }
     }
@@ -42,6 +42,7 @@ def telecharger_natural_earth():
         if not os.path.exists(shp_path):
             st.write(f"Téléchargement de {info['nom']} ...")
             r = requests.get(info["url"])
+            r.raise_for_status()
             z = zipfile.ZipFile(io.BytesIO(r.content))
             z.extractall(dossier_data)
 
@@ -51,13 +52,14 @@ def telecharger_natural_earth():
 
 
 # ==============================
-# 🔹 Fonctions de traitement
+# 🔹 Fonctions utilitaires
 # ==============================
 def charger_shapefile(fichier_shp):
     """Charge un shapefile et retourne un GeoDataFrame."""
     return gpd.read_file(fichier_shp)
 
 def filtrer_pays(contour_gdf, gdf_villes, nom_pays):
+    """Filtre les données pour un pays donné."""
     pays_contour = contour_gdf[contour_gdf["ADMIN"] == nom_pays]
     villes_pays = gdf_villes[gdf_villes["ADM0NAME"] == nom_pays]
     capitale = None
@@ -68,6 +70,7 @@ def filtrer_pays(contour_gdf, gdf_villes, nom_pays):
     return pays_contour, villes_pays, capitale
 
 def obtenir_infos_pays(pays_gdf):
+    """Retourne les infos principales du pays."""
     if not pays_gdf.empty:
         infos = {
             "Nom": pays_gdf["ADMIN"].values[0],
@@ -82,8 +85,9 @@ def obtenir_infos_pays(pays_gdf):
     else:
         return "Aucune information disponible pour ce pays."
 
+
 # ==============================
-# 🔹 Fonctions d'affichage
+# 🔹 Fonctions d’affichage
 # ==============================
 def afficher_contour_pays(pays_gdf, nom_pays):
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -95,70 +99,82 @@ def afficher_villes_pays(pays_gdf, villes_gdf, nom_pays, capitale):
     fig, ax = plt.subplots(figsize=(10, 10))
     pays_gdf.boundary.plot(ax=ax, color="black", linewidth=1, linestyle="dashed")
     villes_gdf.plot(ax=ax, color="skyblue", edgecolor="black", markersize=10)
-
     for x, y, label in zip(villes_gdf.geometry.x, villes_gdf.geometry.y, villes_gdf["NAME"]):
         ax.text(x, y, label, ha="left", color="black", fontsize=8)
-
     ax.set_title(f"Carte de {nom_pays}\nCapitale : {capitale}")
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     st.pyplot(fig)
 
 def afficher_position_ville(pays_gdf, ville_info, nom_pays, ville_souhaitee):
-    if not ville_info.empty:
-        longitude = ville_info.geometry.x.values[0]
-        latitude = ville_info.geometry.y.values[0]
+    """Affiche la position d'une ville sur la carte du pays."""
+    if ville_info is None or ville_info.empty:
+        st.warning(f"La ville '{ville_souhaitee}' n'a pas été trouvée dans {nom_pays}.")
+        return
 
-        fig, ax = plt.subplots(figsize=(10, 10))
-        pays_gdf.boundary.plot(ax=ax, color="blue", linewidth=1, linestyle="dashed")
-        ax.scatter(longitude, latitude, color="red", s=100, label=ville_souhaitee)
-        ax.text(longitude, latitude, f"{ville_souhaitee}", color="black", fontsize=12)
+    try:
+        longitude = float(ville_info.geometry.x.values[0])
+        latitude = float(ville_info.geometry.y.values[0])
+    except Exception as e:
+        st.error(f"Erreur lors de la lecture des coordonnées : {e}")
+        return
 
-        ax.set_title(f"Position de {ville_souhaitee} dans {nom_pays}")
-        ax.legend()
-        st.pyplot(fig)
+    # --- Carte ---
+    fig, ax = plt.subplots(figsize=(10, 10))
+    pays_gdf.boundary.plot(ax=ax, color="blue", linewidth=1, linestyle="dashed")
+    ax.scatter(longitude, latitude, color="red", s=100, label=ville_souhaitee)
+    ax.text(longitude + 0.2, latitude + 0.2, ville_souhaitee, color="black", fontsize=12)
+    ax.set_title(f"Position de {ville_souhaitee} dans {nom_pays}")
+    ax.legend()
+    st.pyplot(fig)
 
-        st.subheader(f"Informations sur {ville_souhaitee}")
-        st.write({
-            "Nom": ville_info["NAME"].values[0],
-            "Latitude": latitude,
-            "Longitude": longitude,
-            "Wilaya": ville_info.get("ADM1NAME", ["Non disponible"])[0],
-            "Classification": ville_info["FEATURECLA"].values[0]
-        })
-    else:
-        st.warning(f"La ville {ville_souhaitee} n'a pas été trouvée dans {nom_pays}")
+    # --- Informations détaillées ---
+    st.subheader(f"Informations sur {ville_souhaitee}")
+    wilaya = ville_info["ADM1NAME"].values[0] if "ADM1NAME" in ville_info.columns else "Non disponible"
+    feature = ville_info["FEATURECLA"].values[0] if "FEATURECLA" in ville_info.columns else "Inconnue"
+
+    st.write({
+        "Nom": ville_info["NAME"].values[0],
+        "Latitude": latitude,
+        "Longitude": longitude,
+        "Wilaya": wilaya,
+        "Classification": feature
+    })
+
 
 # ==============================
 # 🔹 Application principale
 # ==============================
 st.set_page_config(layout="wide", page_title="Visualisation Géographique")
 
-# Téléchargement des shapefiles
+# --- Téléchargement des shapefiles ---
 fichiers = telecharger_natural_earth()
-
 contour_gdf = charger_shapefile(fichiers["countries"])
 villes_gdf = charger_shapefile(fichiers["cities"])
 souverineté_gdf = charger_shapefile(fichiers["sovereignty"])
 
-# Sidebar
+# --- Sidebar ---
 with st.sidebar:
-    st.markdown("***Auteur: Hachemi Mokrane***")
+    st.markdown("***Auteur : Hachemi Mokrane***")
     st.title("Options de visualisation")
 
     liste_pays = sorted(contour_gdf["ADMIN"].unique())
     nom_pays = st.selectbox("Sélectionnez un pays", liste_pays)
 
-    pays_gdf, villes_pays_gdf, capitale = filtrer_pays(contour_gdf, villes_gdf, nom_pays)
+# --- Filtrage du pays sélectionné ---
+pays_gdf, villes_pays_gdf, capitale = filtrer_pays(contour_gdf, villes_gdf, nom_pays)
 
-    if not villes_pays_gdf.empty:
-        liste_villes = sorted(villes_pays_gdf["NAME"].unique())
-        ville_souhaitee = st.selectbox("Sélectionnez une ville", liste_villes)
-    else:
-        ville_souhaitee = None
-        st.warning("Aucune ville disponible pour ce pays")
+# --- Sélecteur de ville ---
+if not villes_pays_gdf.empty:
+    liste_villes = sorted(villes_pays_gdf["NAME"].unique())
+    ville_souhaitee = st.selectbox("Sélectionnez une ville", liste_villes, key=f"ville_{nom_pays}")
+else:
+    st.warning("Aucune ville disponible pour ce pays")
+    ville_souhaitee = None
 
-# Contenu principal
+# ==============================
+# 🔹 Contenu principal
+# ==============================
 st.title(f"Visualisation géographique de {nom_pays}")
 
 if nom_pays:
@@ -176,6 +192,10 @@ if nom_pays:
         st.header(f"Villes de {nom_pays}")
         afficher_villes_pays(pays_gdf, villes_pays_gdf, nom_pays, capitale)
 
+        # --- Rafraîchir à chaque changement ---
         if ville_souhaitee:
-            ville_info = villes_pays_gdf[villes_pays_gdf["NAME"] == ville_souhaitee]
-            afficher_position_ville(pays_gdf, ville_info, nom_pays, ville_souhaitee)
+            ville_info = villes_pays_gdf[villes_pays_gdf["NAME"] == ville_souhaitee].copy()
+            if ville_info.empty:
+                st.warning(f"La ville '{ville_souhaitee}' n’a pas été trouvée.")
+            else:
+                afficher_position_ville(pays_gdf, ville_info, nom_pays, ville_souhaitee)
