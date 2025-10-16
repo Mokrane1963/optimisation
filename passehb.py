@@ -177,12 +177,6 @@ if st.button("🔹 Calculer"):
     ax2.legend()
     st.pyplot(fig2)
 
-# --- Rappels théoriques ---
-st.markdown("---")
-st.markdown("### 📘 Rappels des formules :")
-st.latex(r"\tau = R \times C")
-st.latex(r"f_c = \dfrac{1}{2\pi R C}")
-st.latex(r"H_{passe-bas}(j\omega) = \dfrac{1}{\sqrt{1 + (\omega R C)^2}}")
-st.latex(r"H_{passe-haut}(j\omega) = \dfrac{\omega R C}{\sqrt{1 + (\omega R C)^2}}")
+
 
 st.caption("🧮 Développé avec ❤️ par Hachemi Mokrane — Calculateur RC Streamlit 2025")
