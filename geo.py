@@ -83,6 +83,18 @@ st.sidebar.markdown("""
       font-weight: bold; 
       font-size: 28px; 
       margin-top: 5px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,1.8);">
+   Hachemi mokrane
+  </p>
+</div>
+""", unsafe_allow_html=True)
+st.sidebar.markdown("""
+<div style="text-align: center; font-family: 'Tifinaghe-Ircam Unicode sans serif';">
+  <p style="
+      color: #FFD700; 
+      font-weight: bold; 
+      font-size: 28px; 
+      margin-top: 5px;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
    ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
   </p>
@@ -247,7 +259,7 @@ souverineté_gdf = charger_shapefile(fichiers["sovereignty"])
 
 # Sidebar
 with st.sidebar:
-    st.markdown("***Auteur: Hachemi Mokrane***")
+   
     st.title("Options de visualisation")
 
     liste_pays = sorted(contour_gdf["ADMIN"].unique())
