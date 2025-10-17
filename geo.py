@@ -83,7 +83,7 @@ st.sidebar.markdown("""
       font-weight: bold; 
       font-size: 28px; 
       margin-top: 5px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,1.8);">
+      text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5);">
    Hachemi mokrane
   </p>
 </div>
@@ -95,7 +95,7 @@ st.sidebar.markdown("""
       font-weight: bold; 
       font-size: 28px; 
       margin-top: 5px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+      text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5);">
    ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
   </p>
 </div>
