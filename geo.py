@@ -50,7 +50,95 @@ def telecharger_natural_earth():
 
     return fichiers
 
+# --- Style général ---
+st.markdown("""
+<style>
+div.stButton > button {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: black !important;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 0.5em 1.2em;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+div.stButton > button:hover {
+    background: linear-gradient(135deg, #FFA500, #FF4500);
+    color: white !important;
+    transform: scale(1.05);
+}
+h1, h2, h3, p, label, .stMarkdown { color: white !important; }
+[data-testid="stAppViewContainer"] {
+    background: radial-gradient(circle at top left, #1e3c72, #2a5298);
+    background-attachment: fixed;
+}
+</style>
+""", unsafe_allow_html=True)
+# --- Sidebar avec titre en tifinagh ---
+st.sidebar.markdown("""
+<div style="text-align: center; font-family: 'Tifinaghe-Ircam Unicode sans serif';">
+  <p style="
+      color: #FFD700; 
+      font-weight: bold; 
+      font-size: 28px; 
+      margin-top: 5px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+   ⴰⵣⵓⵍ ⴼⴻⵍⵍⴰⵡⴻⵏ
+  </p>
+</div>
+""", unsafe_allow_html=True)
 
+# --- 🎨 Style des boutons ---
+st.markdown("""
+<style>
+div.stButton > button, div.stDownloadButton > button {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: black !important;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6em 1.2em;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+div.stButton > button:hover, div.stDownloadButton > button:hover {
+    background: linear-gradient(135deg, #FFA500, #FF4500);
+    color: white !important;
+    transform: scale(1.05);
+}
+</style>
+""", unsafe_allow_html=True)
+
+# --- 🎨 Fond dynamique ---
+st.sidebar.header("🎨 Fond dégradé de la page")
+gradient_type = st.sidebar.selectbox("Type de dégradé", ["linear-gradient", "radial-gradient"])
+angle = st.sidebar.slider("Angle (degrés)", 0, 360, 135)
+color1 = st.sidebar.color_picker("Couleur 1", "#1E3C72")
+color2 = st.sidebar.color_picker("Couleur 2", "#2A5298")
+color3 = st.sidebar.color_picker("Couleur 3 (optionnelle)", "#00C9FF")
+use_three_colors = st.sidebar.checkbox("Utiliser 3 couleurs", value=False)
+
+if gradient_type == "linear-gradient":
+    gradient = f"linear-gradient({angle}deg, {color1}, {color2}{', '+color3 if use_three_colors else ''})"
+else:
+    gradient = f"radial-gradient(circle, {color1}, {color2}{', '+color3 if use_three_colors else ''})"
+
+page_bg = f"""
+<style>
+[data-testid="stAppViewContainer"] {{
+    background: {gradient};
+    background-attachment: fixed;
+}}
+[data-testid="stHeader"], [data-testid="stSidebar"], [data-testid="stToolbar"] {{
+    background: none !important;
+}}
+h1, h2, h3, p {{
+    color: white;
+}}
+</style>
+"""
+st.markdown(page_bg, unsafe_allow_html=True)
 
 # ==============================
 # 🔹 Fonctions de traitement
