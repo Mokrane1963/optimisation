@@ -45,6 +45,38 @@ st.markdown("""
   </p>
 </div>
 """, unsafe_allow_html=True)
+st.markdown("""
+<style>
+.subtitle {
+    text-align: left;
+    font-size: 14px;
+    color:#3498db;
+    margin-bottom: 20px;
+}
+h1, h2, h3 {
+    font-size: 26px !important;
+}
+p, li, div {
+    font-size: 18px !important;
+}
+.arabic {
+    font-family: 'Traditional Arabic', Arial;
+    font-size: 22px !important;
+}
+.word-detail {
+    background-color: #f0f2f6;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+.header {
+    color: #4F8BF9;
+    border-bottom: 3px solid #4F8BF6;
+    padding-bottom: 10px;
+    font-size: 30px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Initialisation de la session
 if 'favorites' not in st.session_state:
