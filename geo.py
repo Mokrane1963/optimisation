@@ -50,41 +50,18 @@ def telecharger_natural_earth():
 
     return fichiers
 
-# --- Style général ---
-st.markdown("""
-<style>
-div.stButton > button {
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    color: black !important;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
-    padding: 0.5em 1.2em;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-}
-div.stButton > button:hover {
-    background: linear-gradient(135deg, #FFA500, #FF4500);
-    color: white !important;
-    transform: scale(1.05);
-}
-h1, h2, h3, p, label, .stMarkdown { color: white !important; }
-[data-testid="stAppViewContainer"] {
-    background: radial-gradient(circle at top left, #1e3c72, #2a5298);
-    background-attachment: fixed;
-}
-</style>
-""", unsafe_allow_html=True)
+
+
 # --- Sidebar avec titre en tifinagh ---
 st.sidebar.markdown("""
 <div style="text-align: center; font-family: 'Tifinaghe-Ircam Unicode sans serif';">
   <p style="
-      color: #FFD700; 
+      color: #8B4513; 
       font-weight: bold; 
-      font-size: 28px; 
+      font-size: 18px; 
       margin-top: 5px;
-      text-shadow: 2px 2px 6px rgba(255,0,0,0.8);">
-   Hachemi mokrane
+      text-shadow: 1px px 6px rgba(0,1,0,0.8);">
+   ✨ Beni maouche -Bejaia ✨
   </p>
 </div>
 """, unsafe_allow_html=True)
@@ -140,7 +117,7 @@ def obtenir_infos_pays(pays_gdf):
 def afficher_contour_pays(pays_gdf, nom_pays):
     fig, ax = plt.subplots(figsize=(10, 10))
     pays_gdf.boundary.plot(ax=ax, color="blue", linewidth=1, linestyle="dashed")
-    ax.set_title(f"Contour de {nom_pays}")
+    ax.set_title(f"La carte de {nom_pays}")
     st.pyplot(fig)
 
 def afficher_villes_pays(pays_gdf, villes_gdf, nom_pays, capitale):
@@ -199,7 +176,14 @@ def afficher_position_ville(pays_gdf, ville_info, nom_pays, ville_souhaitee):
 # 🔹 Application principale
 # ==============================
 st.set_page_config(layout="wide", page_title="Visualisation Géographique")
-
+st.markdown("""
+<div style="text-align: center; font-family: courier;">
+  <p style="color: #3366FF; font-weight: bold; font-size: 18px; margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
+    Développé par: Hachemi Mokrane • Septembre 2025
+  </p>
+</div>
+""", unsafe_allow_html=True)
 # Téléchargement des shapefiles
 fichiers = telecharger_natural_earth()
 

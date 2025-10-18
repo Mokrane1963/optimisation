@@ -39,7 +39,7 @@ div.stButton > button {
     border-radius: 10px;
     padding: 0.5em 1.2em;
     transition: all 0.2s ease-in-out;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    box-shadow: 0px 0px 10px rgba(255, 215, 0, 1.1);
 }
 div.stButton > button:hover {
     background: linear-gradient(135deg, #FFA500, #FF4500);

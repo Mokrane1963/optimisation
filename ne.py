@@ -203,7 +203,7 @@ st.markdown("""
 <div style="text-align: center; font-family: courier;">
   <p style="color: #3366FF; font-weight: bold; font-size: 16px; margin-top: 10px;
             text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-    Développé par: Hachemi Mokrane • Octobre 2025
+    Développé par: mok ou si Ali • Octobre 2025
   </p>
 </div>
 """, unsafe_allow_html=True)
