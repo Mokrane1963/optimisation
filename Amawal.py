@@ -14,17 +14,8 @@ import os
 
 # Configuration de la page
 st.set_page_config(layout="wide", page_title="Asegzawal", page_icon="📖")
-st.markdown("""
-<style>
-.subtitle {
-    text-align: left;
-    font-size: 10px;
-    color:#3498db;
-    margin-bottom: 20px;
-}
-</style>
-<p class="subtitle">Amawal Tamazight->Tafrancist : programmé par : Hachemi Mokrane Avril 2025</p>
-""", unsafe_allow_html=True)
+st.markdown("<h1 class='header'> Amawal</h1>", unsafe_allow_html=True)
+
 
 # Style CSS personnalisé
 st.markdown("""
@@ -109,8 +100,7 @@ def load_excel(filepath):
         st.error(f"Erreur lors du chargement du fichier : {str(e)}")
         return None
 
-# Interface utilisateur
-st.markdown("<h1 class='header'> Amawal</h1>", unsafe_allow_html=True)
+
 
 # Sidebar pour les fonctionnalités
 with st.sidebar:
