@@ -207,5 +207,13 @@ else:
             st.markdown(f"**{selected_word.upper()}**")
             st.markdown(f"<p class='arabic'>{details['définition']}</p>", unsafe_allow_html=True)
             st.divider()
-            st.caption("❤️Merci d'avoir utliser notre application  ❤️")
+            st.markdown("""
+            <div style="text-align: center; font-family: courier;">
+              <p style="color: #3366FF; font-weight: bold; font-size: 18px; margin-top: 10px;
+                        text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
+                Développé par: ❤️Merci d'avoir utiliser notre application  ❤️"
+              </p>
+            </div>
+            """, unsafe_allow_html=True)
+           
             st.divider()
