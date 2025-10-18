@@ -201,16 +201,7 @@ else:
                         file_name=f"dictionnaire_{selected_word}.json",
                         mime="application/json"
                     )
-
-            # Affichage des détails
-            st.markdown('<div class="word-detail">', unsafe_allow_html=True)
-            st.markdown(f"**{selected_word.upper()}**")
-            st.markdown(f"<p class='arabic'>{details['définition']}</p>", unsafe_allow_html=True)
-            st.divider()
-
-            st.markdown("**Métadonnées :**")
-            cols = st.columns(2)
-            cols[0].metric("Longueur", details['longueur'])
-            cols[1].metric("Position", details['position'])
-
+                    st.divider
+                    st.caption("❤ Merci d'avoir utiliser notre application ❤")
+                    st.divider
           
