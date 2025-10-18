@@ -201,7 +201,7 @@ else:
                         file_name=f"dictionnaire_{selected_word}.json",
                         mime="application/json"
                     )
-                    st.divider
+                    st.divider()
                     st.caption("❤ Merci d'avoir utiliser notre application ❤")
-                    st.divider
+                    st.divider()
           
