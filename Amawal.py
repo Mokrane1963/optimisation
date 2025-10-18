@@ -100,12 +100,15 @@ with st.sidebar:
                 st.session_state.favorites.remove(fav)
                 st.rerun()
 
-# Zone principale
+# Zone principale------
 uploaded_file = st.file_uploader("📤 Téléversez votre fichier Excel", type=["xlsx", "xls"])
 search_query = st.text_input("🔍 Recherche textuelle", placeholder="Entrez un mot ou une définition")
 
+# Charger le fichier téléversé ou utiliser le fichier par défaut
 if uploaded_file:
     dict_mots = load_excel(uploaded_file)
+else:
+    dict_mots = load_excel("mots.xlsx")
     
     if dict_mots:
         # Filtrage par recherche
