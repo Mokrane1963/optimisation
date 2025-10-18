@@ -211,7 +211,7 @@ else:
             <div style="text-align: center; font-family: courier;">
               <p style="color: #3366FF; font-weight: bold; font-size: 18px; margin-top: 10px;
                         text-shadow: 1px 1px 2px rgba(0,0,0,1.1);">
-                Développé par: ❤️Merci d'avoir utiliser notre application  ❤️"
+                 ❤️Merci d'avoir utiliser notre application  ❤️"
               </p>
             </div>
             """, unsafe_allow_html=True)
