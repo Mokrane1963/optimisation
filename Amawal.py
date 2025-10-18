@@ -45,7 +45,11 @@ p, li, div {
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 class='header'>Amawal s t mazight</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='header'>Amawal s t mazight</h1>", 
+            
+            
+            
+            unsafe_allow_html=True)
 
 
 # Style CSS personnalisé
@@ -209,6 +213,4 @@ else:
             cols[0].metric("Longueur", details['longueur'])
             cols[1].metric("Position", details['position'])
 
-            st.divider()
-            st.markdown(f"**Contexte :**  \n{details['phrase']}")
-            st.markdown("</div>", unsafe_allow_html=True)
+          
