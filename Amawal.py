@@ -45,7 +45,7 @@ p, li, div {
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 class='header'>Asegzawal</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='header'>Amawal s t mazifht</h1>", unsafe_allow_html=True)
 
 
 # Style CSS personnalisé
