@@ -85,9 +85,11 @@ with st.sidebar:
                 st.rerun()
 
 # 🔹 Chargement automatique du fichier amaoual.xlsx
-file_path = "amaoual.xlsx"
+file_path = os.path.join(os.path.dirname(__file__), "Amaoual.xlsx")
+
+# Vérifier s’il existe
 if not os.path.exists(file_path):
-    st.error("❌ Le fichier 'amaoual.xlsx' est introuvable dans le dossier de l’application.")
+    st.error(f"❌ Le fichier '{file_path}' est introuvable dans le dossier de l’application.")
 else:
     dict_mots = load_excel(file_path)
 
