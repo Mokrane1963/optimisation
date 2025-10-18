@@ -13,8 +13,39 @@ import json
 import os
 
 # Configuration de la page
-st.set_page_config(layout="wide", page_title="Asegzawal", page_icon="📖")
-st.markdown("<h1 class='header'> Amawal</h1>", unsafe_allow_html=True)
+st.set_page_config(layout="wide", page_title="Dcitionnaire amazigh", page_icon="📖")
+st.markdown("""
+<style>
+.subtitle {
+    text-align: center;
+    font-size: 14px;
+    color:#3498db;
+    margin-bottom: 20px;
+}
+.header {
+    color: #4F8BF9;
+    border-bottom: 3px solid #4F8BF6;
+    padding-bottom: 10px;
+    font-size: 36px !important;
+    text-align: center;  /* ✅ centrage horizontal */
+}
+p, li, div {
+    font-size: 18px !important;
+}
+.arabic {
+    font-family: 'Traditional Arabic', Arial;
+    font-size: 22px !important;
+}
+.word-detail {
+    background-color: #f0f2f6;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("<h1 class='header'>Asegzawal</h1>", unsafe_allow_html=True)
 
 
 # Style CSS personnalisé
