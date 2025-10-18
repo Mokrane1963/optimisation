@@ -212,7 +212,6 @@ else:
             cols = st.columns(2)
             cols[0].metric("Longueur", details['longueur'])
             cols[1].metric("Position", details['position'])
-
             st.divider()
-            st.markdown(f"**Contexte :**  \n{details['phrase']}")
-            st.markdown("</div>", unsafe_allow_html=True)
+            st.caption("❤️Merci d'avoir utliser notre application  ❤️")
+            st.divider()
